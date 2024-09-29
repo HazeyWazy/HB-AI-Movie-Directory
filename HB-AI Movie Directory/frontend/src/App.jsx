@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 import MovieList from "./components/MovieList";
 import MovieDetail from "./components/MovieDetail";
+import "./App.css";
 
 function App() {
   const [movies, setMovies] = useState([]);
+  const location = useLocation();
 
   const handleSearch = async (searchTerm) => {
     try {
@@ -20,7 +22,15 @@ function App() {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="app">
+      <nav className="nav-bar">
+        <Link to="/" className="home-link">
+          HOME
+        </Link>
+      </nav>
+      {location.pathname === "/" && (
+        <h1 className="app-title">HB-AI Movie Directory</h1>
+      )}
       <Routes>
         <Route
           path="/"

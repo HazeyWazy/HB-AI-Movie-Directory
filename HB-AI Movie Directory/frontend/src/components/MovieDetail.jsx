@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import "./MovieDetail.css";
 
 const MovieDetail = () => {
   const [movie, setMovie] = useState(null);
@@ -22,15 +23,10 @@ const MovieDetail = () => {
   if (!movie) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{movie.Title}</h1>
-      <div className="flex flex-col md:flex-row">
-        <img
-          src={movie.Poster}
-          alt={movie.Title}
-          className="w-full md:w-1/3 mb-4 md:mb-0"
-        />
-        <div className="md:ml-8">
+    <div className="movie-detail-container">
+      <div className="movie-detail">
+        <div className="movie-info">
+          <h1 className="movie-title">{movie.Title}</h1>
           <p>
             <strong>Director:</strong> {movie.Director}
           </p>
@@ -49,6 +45,9 @@ const MovieDetail = () => {
           <p>
             <strong>Rating:</strong> {movie.imdbRating}
           </p>
+        </div>
+        <div className="movie-poster">
+          <img src={movie.Poster} alt={movie.Title} />
         </div>
       </div>
     </div>

@@ -1,0 +1,37 @@
+.movie-detail-container {
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    color: white;
+    padding-top: 20px;
+}
+
+.movie-detail {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.movie-info {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.movie-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.movie-poster {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.movie-poster img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
