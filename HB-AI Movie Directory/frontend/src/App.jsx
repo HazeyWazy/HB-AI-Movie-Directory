@@ -12,7 +12,7 @@ function App() {
 	const handleSearch = async (searchTerm) => {
 		try {
 			const response = await fetch(
-				`http://localhost:5000/api/search?title=${searchTerm}`
+				`https://group-project-gwdp-monday-12pm.onrender.com/api/search?title=${searchTerm}`
 			);
 			const data = await response.json();
 			setMovies(data.Search || []);
