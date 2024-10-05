@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import "./MovieDetail.css";
+import "../index.css";
 
 const MovieDetail = () => {
   const [movie, setMovie] = useState(null);
