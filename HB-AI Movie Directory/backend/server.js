@@ -57,15 +57,21 @@ const openai = new OpenAI({
 
 app.get("/api/suggest", async (req, res) => {
   try {
-    const prompt = "List the top 4 most Ana de Arms movie";
+    const userInput = "give me top rated movies";
+    const prompt = `${userInput}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 100,
+      max_tokens: 200,
     });
+    originalRes = response.choices[0].message.content;
+    console.log(originalRes);
+    userDisplay = originalRes
+      .match(/\d+\. (.*?)(?=\n|$)/g)
+      ?.map((title) => title.replace(/^\d+\.\s*/, ""));
     return res.status(200).json({
       message: "Working",
-      suggestion: response.choices[0].message.content,
+      suggestion: userDisplay,
     });
   } catch (error) {
     return res.status(500).json({
