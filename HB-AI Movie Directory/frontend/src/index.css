@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Roboto", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .nav-button {
+    @apply text-lg cursor-pointer relative border-none bg-transparent;
+    font-family: inherit;
+    transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition-duration: 400ms;
+    transition-property: color;
+  }
+
+  .nav-button:focus,
+  .nav-button:hover {
+    @apply text-orange-400;
+  }
+
+  .nav-button:after {
+    content: "";
+    pointer-events: none;
+    @apply absolute bottom-[-2px] left-1/2 w-0 h-[2px] bg-orange-400;
+    transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition-duration: 400ms;
+    transition-property: width, left;
+  }
+
+  .nav-button:focus:after,
+  .nav-button:hover:after {
+    @apply w-full left-0;
+  }
+}
