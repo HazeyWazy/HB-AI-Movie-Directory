@@ -32,7 +32,6 @@ function App() {
         `http://localhost:5000/api/search?title=${searchTerm}`
       );
       const data = await response.json();
-      console.log(data)
       setMovies(data.Search || []);
     } catch (error) {
       console.error('Error fetching movies:', error);
