@@ -125,7 +125,7 @@ app.get("/api/suggestMoviesAI", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in /api/suggestAndSearch:", error);
+    console.error("Error in /api/suggestMoviesAI:", error);
     return res.status(500).json({
       error: "An error occurred while fetching suggestions and searching",
       details: error.message,
