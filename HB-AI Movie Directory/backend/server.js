@@ -16,6 +16,7 @@ app.get("/api/search", async (req, res) => {
     const url = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&s=${title}`;
     console.log("Making request to:", url);
     const response = await axios.get(url);
+    console.log(response);
     res.json(response.data);
   } catch (error) {
     console.error(
@@ -86,5 +87,42 @@ if (require.main === module) {
     console.log(`Server is running on port ${PORT}`);
   });
 }
+
+app.get("/api/suggestMoviesAI", async (req, res) => {
+  try {
+    const { Userprompt } = req.query;
+    // const userInput = "give me top rated movies";
+    const prompt = `${Userprompt}. Please return the results as a numbered list with only the movie titles.`;
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 100,
+    });
+    originalRes = response.choices[0].message.content;
+    console.log(originalRes);
+    movieTitles = originalRes
+      .match(/\d+\. (.*?)(?=\n|$)/g)
+      ?.map((title) => title.replace(/^\d+\.\s*/, ""));
+
+    const omdbPromises = movieTitles.map(async (title) => {
+      const omdbUrl = `http://www.omdbapi.com/?apikey=${
+        process.env.OMDB_API_KEY
+      }&t=${encodeURIComponent(title)}`;
+      const omdbResponse = await axios.get(omdbUrl);
+      return omdbResponse.data;
+    });
+
+    const movieDetails = await Promise.all(omdbPromises);
+    return res.status(200).json({
+      message: "All good",
+      Search: movieDetails,
+    });
+  } catch (error) {
+    console.error("Error: ", error.message);
+    return res.status(500).json({
+      details: error.message,
+    });
+  }
+});
 
 module.exports = app; // Export the app for testing
