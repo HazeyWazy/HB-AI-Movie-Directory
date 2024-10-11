@@ -83,58 +83,6 @@ app.get("/api/suggest", async (req, res) => {
   }
 });
 
-app.get("/api/suggestAndSearch", async (req, res) => {
-  try {
-    const { input } = req.query;
-    if (!input) {
-      return res.status(400).json({ error: "Missing 'input' query parameter" });
-    }
-
-    // Get movie suggestions from OpenAI
-    const prompt = `Give me movies about ${input}. Please return the results as a numbered list with only the movie titles.`;
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 200,
-    });
-
-    const suggestedMovies = response.choices[0].message.content
-      .split('\n')
-      .map(line => line.replace(/^\d+\.\s*/, "").trim())
-      .filter(Boolean);
-
-    // Search for each suggested movie using OMDB API
-    const movieDetailsPromises = suggestedMovies.map(async (title) => {
-      const url = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
-      const response = await axios.get(url);
-      return response.data;
-    });
-
-    const movieDetails = await Promise.all(movieDetailsPromises);
-
-    // Filter out any movies not found and prepare the response
-    const foundMovies = movieDetails.filter(movie => movie.Response === "True");
-
-    return res.status(200).json({
-      message: "Suggestions and search results combined successfully",
-      results: foundMovies,
-    });
-
-  } catch (error) {
-    console.error("Error in /api/suggestAndSearch:", error);
-    return res.status(500).json({
-      error: "An error occurred while fetching suggestions and searching",
-      details: error.message,
-    });
-  }
-});
-// Only start the server if this file is run directly
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
-
 app.get("/api/suggestMoviesAI", async (req, res) => {
   try {
     const { Userprompt } = req.query;
@@ -171,5 +119,12 @@ app.get("/api/suggestMoviesAI", async (req, res) => {
     });
   }
 });
+
+// Only start the server if this file is run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 module.exports = app; // Export the app for testing
