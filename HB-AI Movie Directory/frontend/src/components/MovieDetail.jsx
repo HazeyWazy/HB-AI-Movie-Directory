@@ -32,31 +32,33 @@ const MovieDetail = () => {
   };
 
   return (
-    <div className="">
-      <div className="">
-        <div className="">
-          <h1 className="">{movie.Title}</h1>
-          <p>
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white py-12 px-4">
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
+        <div className="md:w-1/2">
+          <img
+            src={movie.Poster}
+            alt={movie.Title}
+            className="mx-auto rounded-lg shadow-md"
+          />
+        </div>
+        <div className="md:w-1/2 md:ml-10 mt-8 md:mt-0">
+          <h1 className="text-4xl font-bold mb-4">{movie.Title}</h1>
+          <p className="mb-2">
             <strong>Director:</strong> {movie.Director}
           </p>
-          <p>
+          <p className="mb-2">
             <strong>Cast:</strong> {movie.Actors}
           </p>
-          <p>
+          <p className="mb-2">
             <strong>Year:</strong> {movie.Year}
           </p>
-          <p>
+          <p className="mb-2">
             <strong>Genre:</strong> {movie.Genre}
           </p>
-          <p>
-            <strong>Plot:</strong> {movie.Plot}
+          <p className="mb-4">
+            <strong>Rating:</strong> {movie.imdbRating} / 10
           </p>
-          <p>
-            <strong>Rating:</strong> {movie.imdbRating}
-          </p>
-        </div>
-        <div className="">
-          <img src={movie.Poster} alt={movie.Title} />
+          <p className="mb-4 text-lg">{movie.Plot}</p>
         </div>
       </div>
     </div>
