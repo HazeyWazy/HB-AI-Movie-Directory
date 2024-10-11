@@ -9,7 +9,7 @@ const url = process.env.MONGO_URL;
 mongoose.connect(url);
 const OpenAI = require("openai");
 const registerRoute = require("./register");
-var userlogin = require("./login");
+var userlogin = require("./loginLogout");
 const loadUser = require("./middleware/loadUser");
 
 const app = express();
