@@ -3,25 +3,13 @@ const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
 // const { Configuration, OpenAIApi } = require("openai");
-const cookieParser = require("cookie-parser");
-const mongoose = require("mongoose");
-const url = process.env.MONGO_URL;
-mongoose.connect(url);
 const OpenAI = require("openai");
-const registerRoute = require("./register");
-var userlogin = require("./login");
-const loadUser = require("./middleware/loadUser");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(loadUser);
-app.use("/api/register", registerRoute);
-app.use("/api", userlogin);
+
 app.get("/api/search", async (req, res) => {
   try {
     const { title } = req.query;
