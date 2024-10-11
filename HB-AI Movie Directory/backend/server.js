@@ -9,7 +9,6 @@ const OpenAI = require("openai");
 // var userlogin = require("./loginLogout");
 // const loadUser = require("./middleware/loadUser");
 
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
