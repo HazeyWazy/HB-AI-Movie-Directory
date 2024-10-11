@@ -2,13 +2,29 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
 // const { Configuration, OpenAIApi } = require("openai");
 const OpenAI = require("openai");
+
+const mongoose = require("mongoose");
+const url = process.env.MONGO_URL;
+mongoose.connect(url);
+
+const registerRoute = require("./register");
+var userlogin = require("./loginLogout");
+const loadUser = require("./middleware/loadUser");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(cookieParser()); // Use cookie-parser middleware
 app.use(cors());
+app.use(loadUser);
+app.use(cors());
+app.use(express.json()); // To parse JSON request bodies
+app.use(express.urlencoded({ extended: true })); // To parse URL-encoded request bodies
+app.use("api//register", registerRoute);
+app.use("/api", userlogin);
 
 app.get("/api/search", async (req, res) => {
   try {
@@ -16,6 +32,7 @@ app.get("/api/search", async (req, res) => {
     const url = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&s=${title}`;
     console.log("Making request to:", url);
     const response = await axios.get(url);
+    console.log(response);
     res.json(response.data);
   } catch (error) {
     console.error(
@@ -57,7 +74,8 @@ const openai = new OpenAI({
 
 app.get("/api/suggest", async (req, res) => {
   try {
-    const userInput = "give me top rated movies";
+    const { input } = req.query;
+    const userInput = `give me movies about ${input}`;
     const prompt = `${userInput}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -80,6 +98,44 @@ app.get("/api/suggest", async (req, res) => {
     });
   }
 });
+
+app.get("/api/suggestMoviesAI", async (req, res) => {
+  try {
+    const { Userprompt } = req.query;
+    // const userInput = "give me top rated movies";
+    const prompt = `${Userprompt}. Please return the results as a numbered list with only the movie titles.`;
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 100,
+    });
+    originalRes = response.choices[0].message.content;
+    console.log(originalRes);
+    movieTitles = originalRes
+      .match(/\d+\. (.*?)(?=\n|$)/g)
+      ?.map((title) => title.replace(/^\d+\.\s*/, ""));
+
+    const omdbPromises = movieTitles.map(async (title) => {
+      const omdbUrl = `http://www.omdbapi.com/?apikey=${
+        process.env.OMDB_API_KEY
+      }&t=${encodeURIComponent(title)}`;
+      const omdbResponse = await axios.get(omdbUrl);
+      return omdbResponse.data;
+    });
+
+    const movieDetails = await Promise.all(omdbPromises);
+    return res.status(200).json({
+      message: "All good",
+      Search: movieDetails,
+    });
+  } catch (error) {
+    console.error("Error: ", error.message);
+    return res.status(500).json({
+      details: error.message,
+    });
+  }
+});
+
 // Only start the server if this file is run directly
 if (require.main === module) {
   app.listen(PORT, () => {
