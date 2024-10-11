@@ -5,6 +5,11 @@ require("dotenv").config();
 // const { Configuration, OpenAIApi } = require("openai");
 const OpenAI = require("openai");
 
+const registerRoute = require("./register");
+var userlogin = require("./loginLogout");
+const loadUser = require("./middleware/loadUser");
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
