@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import "../index.css";
 
 const MovieList = ({ movies }) => {
@@ -18,8 +18,12 @@ const MovieList = ({ movies }) => {
               alt={movie.Title}
               className="min-w-full max-h-80 rounded-md mb-4"
             />
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{movie.Title}</h2>
-            <p className="text-md text-gray-600 dark:text-gray-300">{movie.Year} • {movie.Type}</p>     
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {movie.Title}
+            </h2>
+            <p className="text-md text-gray-600 dark:text-gray-300">
+              {movie.Year} • {movie.Type}
+            </p>
           </div>
         </Link>
       ))}
@@ -29,7 +33,15 @@ const MovieList = ({ movies }) => {
 
 // propTypes validation
 MovieList.propTypes = {
-  movies: PropTypes.func.isRequired,
+  movies: PropTypes.arrayOf(
+    PropTypes.shape({
+      imdbID: PropTypes.string.isRequired,
+      Poster: PropTypes.string.isRequired,
+      Title: PropTypes.string.isRequired,
+      Year: PropTypes.string.isRequired,
+      Type: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default MovieList;

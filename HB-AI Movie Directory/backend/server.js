@@ -3,25 +3,18 @@ const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
 // const { Configuration, OpenAIApi } = require("openai");
-const cookieParser = require("cookie-parser");
-const mongoose = require("mongoose");
-const url = process.env.MONGO_URL;
-mongoose.connect(url);
 const OpenAI = require("openai");
+
 const registerRoute = require("./register");
 var userlogin = require("./loginLogout");
 const loadUser = require("./middleware/loadUser");
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(loadUser);
-app.use("/api/register", registerRoute);
-app.use("/api", userlogin);
+
 app.get("/api/search", async (req, res) => {
   try {
     const { title } = req.query;
@@ -70,7 +63,8 @@ const openai = new OpenAI({
 
 app.get("/api/suggest", async (req, res) => {
   try {
-    const userInput = "give me top rated movies";
+    const {input} = req.query;
+    const userInput = `give me movies about ${input}`;
     const prompt = `${userInput}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -93,12 +87,6 @@ app.get("/api/suggest", async (req, res) => {
     });
   }
 });
-// Only start the server if this file is run directly
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
 
 app.get("/api/suggestMoviesAI", async (req, res) => {
   try {
@@ -136,5 +124,12 @@ app.get("/api/suggestMoviesAI", async (req, res) => {
     });
   }
 });
+
+// Only start the server if this file is run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 module.exports = app; // Export the app for testing
