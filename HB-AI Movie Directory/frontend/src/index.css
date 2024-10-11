@@ -17,7 +17,6 @@
     transition-property: color;
   }
 
-  .nav-button:focus,
   .nav-button:hover {
     @apply text-orange-400;
   }
@@ -31,7 +30,6 @@
     transition-property: width, left;
   }
 
-  .nav-button:focus:after,
   .nav-button:hover:after {
     @apply w-full left-0;
   }
