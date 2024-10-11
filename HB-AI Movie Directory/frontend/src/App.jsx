@@ -29,7 +29,7 @@ function App() {
   const handleSearch = async (searchTerm) => {
     try {
       const response = await fetch(
-        `https://group-project-gwdp-monday-12pm.onrender.com/api/suggestAndSearch?input=${searchTerm}`
+        `https://group-project-gwdp-monday-12pm.onrender.com/api/suggestMoviesAI?input=${searchTerm}`
       );
       console.log(response);
       const data = await response.json();
