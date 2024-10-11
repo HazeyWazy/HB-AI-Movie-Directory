@@ -74,7 +74,10 @@ const openai = new OpenAI({
 
 app.get("/api/suggest", async (req, res) => {
   try {
+    ry;
+
     const { input } = req.query;
+
     const userInput = `give me movies about ${input}`;
     const prompt = `${userInput}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
