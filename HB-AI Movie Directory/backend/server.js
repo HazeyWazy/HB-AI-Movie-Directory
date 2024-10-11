@@ -2,17 +2,32 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
 // const { Configuration, OpenAIApi } = require("openai");
 const OpenAI = require("openai");
 
-// const registerRoute = require("./register");
-// var userlogin = require("./loginLogout");
-// const loadUser = require("./middleware/loadUser");
+
+const mongoose = require("mongoose");
+const url = process.env.MONGO_URL;
+mongoose.connect(url);
+
+const registerRoute = require("./register");
+var userlogin = require("./loginLogout");
+const loadUser = require("./middleware/loadUser");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(cookieParser()); // Use cookie-parser middleware
 app.use(cors());
+app.use(loadUser);
+app.use(cors());
+app.use(express.json()); // To parse JSON request bodies
+app.use(express.urlencoded({ extended: true })); // To parse URL-encoded request bodies
+app.use("api//register", registerRoute);
+app.use("/api", userlogin);
 
 app.get("/api/search", async (req, res) => {
   try {
@@ -62,7 +77,10 @@ const openai = new OpenAI({
 
 app.get("/api/suggest", async (req, res) => {
   try {
-    const {input} = req.query;
+    ry;
+
+    const { input } = req.query;
+
     const userInput = `give me movies about ${input}`;
     const prompt = `${userInput}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
