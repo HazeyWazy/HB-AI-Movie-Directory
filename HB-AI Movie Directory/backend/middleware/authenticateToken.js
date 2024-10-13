@@ -8,18 +8,19 @@ const authenticateToken = async (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
-  try {
-    // Verify the token using the secret key
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded Token:', decoded);
+  console.log('Received token:', token); // Add this line for debugging
 
-    // req.user = await User.findById(decoded.userId).populate('watchlists');
-    next(); // Pass control to the next middleware
-  } catch (error) {
-    console.error('JWT Verification Error:', error);
-
-    return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
-  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    console.log('JWT verify result:', err, decoded);  // Modified this line for clarity
+    if (err) {
+      console.log('Token verification failed:', err); // Add this line for debugging
+      return res.status(403).json({ error: "Failed to authenticate token" });
+    }
+    
+    req.user = decoded;
+    console.log('User attached to request:', req.user); // Add this line for debugging
+    next();
+  });
 };
 
 module.exports = authenticateToken;

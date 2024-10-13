@@ -46,15 +46,20 @@ exports.logout = (req, res) => {
   return res.status(200).json({ message: "Logout successful" });
 };
 
-// New function to get user info
 exports.getUserInfo = async (req, res) => {
+  console.log('Request user object:', req.user);  // Keep this line for debugging
   try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     const user = await User.findById(req.user.userId).select('-password');
+    console.log('Found user:', user);  // Keep this line for debugging
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
   } catch (error) {
+    console.error('Error in getUserInfo:', error);  // Keep this line for debugging
     res.status(500).json({ error: error.message });
   }
 };

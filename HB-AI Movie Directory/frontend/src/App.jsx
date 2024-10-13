@@ -57,10 +57,7 @@ function App() {
     try {
       const response = await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/user", {
         method: "GET",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        credentials: "include"
+        credentials: "include",
       });
       if (response.ok) {
         const data = await response.json();
@@ -76,15 +73,13 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch(
-        "https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       localStorage.removeItem("token");
       setIsLoggedIn(false);
+      setUsername("Guest");
       navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -167,9 +162,15 @@ function App() {
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route
             path="/signin"
-            element={<SignIn setIsLoggedIn={setIsLoggedIn} />}
+            element={
+              <SignIn
+                setIsLoggedIn={setIsLoggedIn}
+                darkMode={darkMode}
+                onLoginSuccess={fetchUserInfo}
+              />
+            }
           />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
         </Routes>
       </main>
     </div>
