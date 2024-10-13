@@ -18,6 +18,7 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("Guest");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -52,12 +53,36 @@ function App() {
     }
   };
 
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/user", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        credentials: "include"
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsername(data.name);
+      } else {
+        throw new Error("Failed to fetch user info");
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      setUsername("Guest");
+    }
+  };
+
   const handleLogout = async () => {
     try {
-      await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      await fetch(
+        "https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout",
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
       localStorage.removeItem("token");
       setIsLoggedIn(false);
       navigate("/");
@@ -67,9 +92,7 @@ function App() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300"
-    >
+    <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       {/* Navigation bar */}
       <nav className="flex justify-between items-center py-5 px-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center">
@@ -128,7 +151,7 @@ function App() {
       <main className="p-4 transition-all duration-300">
         {location.pathname === "/" && (
           <h1 className="text-center text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-medium mt-72 mb-5">
-            Welcome, Username!
+            Welcome, {username}!
           </h1>
         )}
         <Routes>

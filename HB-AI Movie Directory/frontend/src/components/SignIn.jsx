@@ -12,20 +12,25 @@ const SignIn = ({ setIsLoggedIn, darkMode }) => {
     try {
       const response = await fetch('https://group-project-gwdp-monday-12pm.onrender.com/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
         credentials: 'include',
       });
-      const data = await response.json();
+
       if (response.ok) {
+        const data = await response.json();
         localStorage.setItem('token', data.token);
         setIsLoggedIn(true);
+        onLoginSuccess(); // Call this function to fetch user info
         navigate('/');
       } else {
-        setError(data.error || 'Login failed');
+        // Handle login error
+        console.error('Login failed');
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+      console.error('Error during login:', error);
     }
   };
 
