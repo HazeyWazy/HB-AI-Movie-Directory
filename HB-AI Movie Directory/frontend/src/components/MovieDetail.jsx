@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import AddToWatchlist from "./AddToWatchlist";
 import "../index.css";
 
 const MovieDetail = () => {
@@ -10,7 +9,7 @@ const MovieDetail = () => {
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/movies/movie/${id}`);
+        const response = await fetch(`https://group-project-gwdp-monday-12pm.onrender.com/api/movies/movie/${id}`);
         const data = await response.json();
         setMovie(data);
       } catch (error) {
@@ -60,7 +59,6 @@ const MovieDetail = () => {
             <strong>Rating:</strong> {movie.imdbRating} / 10
           </p>
           <p className="mb-4 text-lg">{movie.Plot}</p>
-          <AddToWatchlist movieId={movie.imdbID} />
         </div>
       </div>
     </div>

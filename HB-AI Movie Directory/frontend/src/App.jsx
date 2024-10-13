@@ -11,8 +11,6 @@ import MovieList from "./components/MovieList";
 import MovieDetail from "./components/MovieDetail";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
-import WatchlistSidebar from "./components/WatchlistSidebar";
-import WatchlistDetail from "./components/WatchlistDetail";
 import logo from "./imgs/film-roll.png";
 import "./index.css";
 
@@ -20,7 +18,6 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,7 +42,7 @@ function App() {
   const handleSearch = async (searchTerm) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/movies/suggestMoviesAI?userPrompt=${searchTerm}`
+        `https://group-project-gwdp-monday-12pm.onrender.com/api/movies/suggestMoviesAI?userPrompt=${searchTerm}`
       );
       const data = await response.json();
       console.log(data);
@@ -57,7 +54,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/api/auth/logout", {
+      await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
@@ -71,21 +68,11 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300 ${
-        sidebarOpen ? "ml-64" : "ml-0"
-      }`}
+      className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300"
     >
       {/* Navigation bar */}
       <nav className="flex justify-between items-center py-5 px-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center">
-          {isLoggedIn && (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="mr-4 text-2xl focus:outline-none"
-            >
-              ☰
-            </button>
-          )}
           <Link to="/" className="flex items-center cursor-pointer">
             <img src={logo} alt="Logo" className="w-7 h-7" />
             <p className="text-center text-lg px-2">HB-AI Movie Directory</p>
@@ -137,9 +124,6 @@ function App() {
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <WatchlistSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-
       {/* Main content */}
       <main className="p-4 transition-all duration-300">
         {location.pathname === "/" && (
@@ -148,7 +132,6 @@ function App() {
           </h1>
         )}
         <Routes>
-          <Route path="/watchlist/:id" element={<WatchlistDetail />} />
           <Route
             path="/"
             element={

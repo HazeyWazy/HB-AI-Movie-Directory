@@ -6,9 +6,9 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  profilePicture: { type: String },
-  searchHistory: [{ type: String }],
-  watchlists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Watchlist' }]
+  // profilePicture: { type: String },
+  // searchHistory: [{ type: String }],
+  // watchlists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Watchlist' }]
 });
 
 userSchema.pre('save', async function(next) {
@@ -18,6 +18,7 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };

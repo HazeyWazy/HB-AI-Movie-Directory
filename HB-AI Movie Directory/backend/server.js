@@ -8,7 +8,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your frontend URL
+  origin: 'https://group-project-gwdp-monday-12pm-8mrf.onrender.com', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -20,11 +20,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
-const watchlistRoutes = require('./routes/watchlistRoutes');
+// const watchlistRoutes = require('./routes/watchlistRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 
 app.use('/api/auth', authRoutes);
-app.use('/api/watchlists', watchlistRoutes);
+// app.use('/api/watchlists', watchlistRoutes);
 app.use('/api/movies', movieRoutes);
 
 // MongoDB connection

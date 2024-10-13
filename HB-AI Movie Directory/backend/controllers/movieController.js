@@ -1,4 +1,3 @@
-const axios = require('axios');
 const OpenAI = require('openai');
 const { fetchMovieByTitle, fetchMovieDetailsById } = require('../services/movieService');
 
@@ -46,7 +45,7 @@ exports.suggestMoviesAI = async (req, res) => {
   try {
     const prompt = `Give me movies about ${input}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 200,
     });
@@ -71,7 +70,7 @@ exports.suggestAndFetchMoviesAI = async (req, res) => {
   try {
     const prompt = `Give me movies about ${userPrompt}. Please return the results as a numbered list with only the movie titles.`;
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 100,
     });

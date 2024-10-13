@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
 const authenticateToken = async (req, res, next) => {
   // Get token from cookie or Authorization header
@@ -14,7 +13,7 @@ const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Decoded Token:', decoded);
 
-    req.user = await User.findById(decoded.userId).populate('watchlists');
+    // req.user = await User.findById(decoded.userId).populate('watchlists');
     next(); // Pass control to the next middleware
   } catch (error) {
     console.error('JWT Verification Error:', error);
