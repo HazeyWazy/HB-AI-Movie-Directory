@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import PropTypes from 'prop-types';
 
 const SignUp = ({ darkMode }) => {
   const [name, setName] = useState("");
@@ -171,6 +172,11 @@ const SignUp = ({ darkMode }) => {
       </div>
     </div>
   );
+};
+
+// propTypes validation
+SignUp.propTypes = {
+  darkMode: PropTypes.bool.isRequired, 
 };
 
 export default SignUp;
