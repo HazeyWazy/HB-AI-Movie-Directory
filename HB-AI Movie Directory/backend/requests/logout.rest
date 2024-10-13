@@ -1,0 +1,23 @@
+POST http://localhost:5000/api/auth/login 
+Content-Type: application/json
+
+{
+    "email": "123@gmail.com",
+    "password": "123"
+}
+
+############
+GET http://localhost:5000/api/watchlists/670b6415a122b53e7c4b6aaf
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzBiYzM3YjViODI1NWQwZjQwNTA0NjkiLCJpYXQiOjE3Mjg4MjQxODksImV4cCI6MTcyODgyNzc4OX0.2ZzU-cp_rkl9YlQ2iItTC3793VwEvdPVVAVGxCiqHNk
+
+############
+POST http://localhost:5000/api/auth/register 
+Content-Type: application/json
+
+{
+    "name": "123",
+    "email": "123@gmail.com",
+    "password": "123"
+}
+
+#########

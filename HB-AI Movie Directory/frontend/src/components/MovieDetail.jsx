@@ -9,7 +9,7 @@ const MovieDetail = () => {
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/movie/${id}`);
+        const response = await fetch(`https://group-project-gwdp-monday-12pm.onrender.com/api/movies/movie/${id}`);
         const data = await response.json();
         setMovie(data);
       } catch (error) {
