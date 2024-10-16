@@ -30,9 +30,10 @@ const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         setIsLoggedIn(true);
-        onLoginSuccess();
+        onLoginSuccess(); // Call this function to fetch user info
         navigate("/");
       } else {
+        // Handle login error
         console.error("Login failed");
       }
     } catch (error) {
