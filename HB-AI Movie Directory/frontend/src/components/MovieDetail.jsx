@@ -32,7 +32,7 @@ const MovieDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white py-12 px-4">
+    <div className="bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white py-12 px-4">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
         <div className="md:w-1/2">
           <img
