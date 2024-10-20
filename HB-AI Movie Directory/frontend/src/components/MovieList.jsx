@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const MovieList = ({ movies, onAddToFavourites }) => {
+const MovieList = ({ movies }) => {
   return (
     <div className="flex flex-wrap justify-center gap-10 mt-10 px-4 py-6">
       {movies
@@ -32,15 +32,6 @@ const MovieList = ({ movies, onAddToFavourites }) => {
               </div>
             </Link>
 
-            {/* Add to Favourites Button */}
-            <div className="p-4">
-              <button
-                onClick={() => onAddToFavourites(movie.imdbID)} // Pass the movie's imdbID to the function
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300 w-full"
-              >
-                Add to Favourites
-              </button>
-            </div>
           </div>
         ))}
     </div>
@@ -58,7 +49,6 @@ MovieList.propTypes = {
       Type: PropTypes.string.isRequired,
     })
   ).isRequired,
-  onAddToFavourites: PropTypes.func.isRequired, // Function to handle adding to favourites
 };
 
 export default MovieList;
