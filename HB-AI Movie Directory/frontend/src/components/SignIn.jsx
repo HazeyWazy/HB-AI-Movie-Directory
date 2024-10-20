@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import movies from '../imgs/movies.jpeg';
-import {apiUrl} from "../config";
+import { apiUrl } from "../config";
+import { useUser } from '../context/UserContext';
 
-
-const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
+const SignIn = ({ darkMode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
+  const { login } = useUser();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setTimeout(() => setImageLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -31,8 +32,7 @@ const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
-        setIsLoggedIn(true);
-        onLoginSuccess(); // Call this function to fetch user info
+        await login();  // Use the login function from UserContext
         navigate("/");
       } else {
         // Handle login error
@@ -119,9 +119,6 @@ const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
 };
 
 SignIn.propTypes = {
-  setIsLoggedIn: PropTypes.func.isRequired, 
-  darkMode: PropTypes.bool.isRequired, 
-  onLoginSuccess: PropTypes.func.isRequired,
+  darkMode: PropTypes.bool.isRequired,
 };
-
 export default SignIn;

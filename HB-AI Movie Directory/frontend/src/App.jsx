@@ -13,17 +13,16 @@ import Favourites from "./components/Favourites";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
+import { useUser } from "./context/UserContext";
 import logo from "./imgs/film-roll.png";
 
 import "./index.css";
-import { apiUrl, deployUrl } from "./config";
+import { apiUrl } from "./config";
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("Guest");
-  const [profilePicture, setProfilePicture] = useState("");
+  const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,11 +30,6 @@ function App() {
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
     setDarkMode(savedMode);
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-    if (token) {
-      fetchUserInfo();
-    }
   }, []);
 
   // Update dark mode effect
@@ -48,30 +42,6 @@ function App() {
     }
   }, [darkMode]);
 
-  // Profile picture update listener
-  useEffect(() => {
-    const handleProfilePictureUpdate = (event) => {
-      // Ensure we're using the full URL here
-      setProfilePicture(event.detail ? `${apiUrl}/${event.detail}` : "");
-      console.log(
-        "Profile picture updated to:",
-        event.detail ? `${apiUrl}/${event.detail}` : ""
-      );
-    };
-
-    window.addEventListener(
-      "profilePictureUpdated",
-      handleProfilePictureUpdate
-    );
-
-    return () => {
-      window.removeEventListener(
-        "profilePictureUpdated",
-        handleProfilePictureUpdate
-      );
-    };
-  }, []);
-
   // Search handler
   const handleSearch = async (searchTerm) => {
     try {
@@ -79,65 +49,24 @@ function App() {
         `${apiUrl}/movies/suggestMoviesAI?userPrompt=${searchTerm}`
       );
       const data = await response.json();
-      console.log(data);
       setMovies(data.results || []);
     } catch (error) {
       console.error("Error fetching movies:", error);
     }
   };
 
-  // Fetch user info function
-  const fetchUserInfo = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsLoggedIn(false);
-        setUsername("Guest");
-        setProfilePicture("");
-        return;
-      }
-      const response = await fetch(`${apiUrl}/auth/user`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log("User data:", data); // Log the entire user data
-        setUsername(data.name);
-        setIsLoggedIn(true);
-        // Construct the full URL for the profile picture
-        setProfilePicture(data.profilePicture || "");
-        console.log(
-          "Profile picture set to:",
-          data.profilePicture ? `${apiUrl}/${data.profilePicture}` : ""
-        ); // Log the full profile picture URL
-      } else {
-        throw new Error("Failed to fetch user info");
-      }
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-      setIsLoggedIn(false);
-      setUsername("Guest");
-      setProfilePicture("");
-      localStorage.removeItem("token");
-    }
-  };
-
   // Logout handler
   const handleLogout = async () => {
     try {
+      const token = localStorage.getItem("token");
       await fetch(`${apiUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      localStorage.removeItem("token");
-      setIsLoggedIn(false);
-      setUsername("Guest");
-      setProfilePicture(""); // Clear profile picture on logout
+      logout();
       navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -205,7 +134,7 @@ function App() {
               {/* Profile picture link */}
               <Link to="/profile" className="mr-4">
                 <img
-                  src={profilePicture || "https://via.placeholder.com/40"}
+                  src={user?.profilePicture || "https://via.placeholder.com/40"}
                   alt="Profile"
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
                 />
@@ -251,7 +180,7 @@ function App() {
       <main className="p-4 transition-all duration-300">
         {location.pathname === "/" && (
           <h1 className="text-center text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-medium mt-72 mb-5">
-            Welcome, {username}!
+            Welcome, {user ? user.name : "Guest"}!
           </h1>
         )}
         <Routes>
@@ -268,16 +197,8 @@ function App() {
             }
           />
           <Route path="/movie/:id" element={<MovieDetail />} />
-          <Route
-            path="/signin"
-            element={
-              <SignIn
-                setIsLoggedIn={setIsLoggedIn}
-                darkMode={darkMode}
-                onLoginSuccess={fetchUserInfo}
-              />
-            }
-          />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/signin" element={<SignIn darkMode={darkMode} />} />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/profile" element={<Profile />} />
