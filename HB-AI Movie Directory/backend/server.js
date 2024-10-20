@@ -9,7 +9,10 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: "https://group-project-gwdp-monday-12pm-8mrf.onrender.com",
+    origin: [
+      "https://group-project-gwdp-monday-12pm-8mrf.onrender.com", // Deployed frontend
+      "http://localhost:3000", // Local development
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

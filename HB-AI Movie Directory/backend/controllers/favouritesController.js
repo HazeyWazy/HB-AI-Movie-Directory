@@ -64,12 +64,13 @@ exports.removeFavorite = async (req, res) => {
 
 exports.getFavorites = async (req, res) => {
   const userId = req.user.userId;
+  console.log("GET /favourites route hit");
 
   try {
     const favorites = await Favorites.findOne({ userId });
 
     if (!favorites || favorites.movies.length === 0) {
-      return res.status(404).json({ message: "No favorites found" });
+      return res.status(202).json({ message: "No favorites found" });
     }
 
     const movieDetailsPromises = favorites.movies.map(fetchMovieDetailsById);

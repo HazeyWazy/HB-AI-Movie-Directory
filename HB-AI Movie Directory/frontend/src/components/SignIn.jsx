@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import movies from '../imgs/movies.jpeg';
+import {apiUrl} from "../config";
+
 
 const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
@@ -17,7 +19,7 @@ const SignIn = ({ setIsLoggedIn, darkMode, onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/login", {
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

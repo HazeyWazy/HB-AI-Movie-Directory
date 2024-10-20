@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "../index.css";
-
+import {apiUrl} from "../config";
 const MovieDetail = () => {
   const [movie, setMovie] = useState(null);
   const { id } = useParams();
@@ -9,7 +9,7 @@ const MovieDetail = () => {
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
-        const response = await fetch(`https://group-project-gwdp-monday-12pm.onrender.com/api/movies/movie/${id}`);
+        const response = await fetch(`${apiUrl}/movies/movie/${id}`);
         const data = await response.json();
         setMovie(data);
       } catch (error) {
