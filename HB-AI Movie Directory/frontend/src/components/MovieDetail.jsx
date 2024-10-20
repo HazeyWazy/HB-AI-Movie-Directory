@@ -25,7 +25,7 @@ const MovieDetail = ({ onAddToFavourites }) => {
   if (!movie) {
     return ( 
       // loader
-      <div className="flex flex-col min-h-[90vh] text-center justify-center">
+      <div className="flex flex-col min-h-[85vh] text-center justify-center">
         <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-orange-300 border-t-gray-300"></div>
         <p className="mt-4 text-lg text-slate-900 dark:text-white">Loading...</p>
         <p className="mt-1 text-slate-600 dark:text-slate-400">Rolling out the details, just for you</p>
@@ -52,11 +52,17 @@ const MovieDetail = ({ onAddToFavourites }) => {
             <strong>Cast:</strong> {movie.Actors}
           </p>
           <p className="mb-2">
+            <strong>Genre:</strong> {movie.Genre}
+          </p>
+          <p className="mb-2">
             <strong>Year:</strong> {movie.Year}
           </p>
           <p className="mb-2">
-            <strong>Genre:</strong> {movie.Genre}
+            <strong>Rated:</strong> {movie.Rated}
           </p>
+          <p className="mb-2">
+            <strong>Runtime:</strong> {movie.Runtime}
+          </p>          
           <p className="mb-4">
             <strong>Rating:</strong> {movie.imdbRating} / 10
           </p>
