@@ -110,9 +110,7 @@ function App() {
         setUsername(data.name);
         setIsLoggedIn(true);
         // Construct the full URL for the profile picture
-        setProfilePicture(
-          data.profilePicture ? `${deployUrl}/${data.profilePicture}` : ""
-        );
+        setProfilePicture(data.profilePicture || "");
         console.log(
           "Profile picture set to:",
           data.profilePicture ? `${apiUrl}/${data.profilePicture}` : ""
