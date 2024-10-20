@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {apiUrl} from "../config";
-
 
 function Favourites() {
   const [favorites, setFavourites] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
- 
+  const [error, setError] = useState(null); 
 
   // Fetch the user's favorites from the backend
   useEffect(() => {
@@ -41,7 +39,14 @@ function Favourites() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      // loader
+      <div className="flex flex-col min-h-[85vh] text-center justify-center">
+        <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-orange-300 border-t-gray-300"></div>
+        <p className="mt-4 text-lg text-slate-900 dark:text-white">Loading...</p>
+        <p className="mt-1 text-slate-600 dark:text-slate-400">Bringing your favourites together</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -49,20 +54,35 @@ function Favourites() {
   }
 
   return (
-    <div className="favorites-section p-4">
-      <h2 className="text-center text-2xl font-medium my-5">Your Favourite Movies</h2>
+    <div className="flex-col flex-wrap justify-center gap-10 px-4 py-6">
+      <h2 className="text-center text-4xl font-medium">Your Favourite Movies</h2>
+      
       {favorites && favorites.length === 0 ? (
-        <p className="text-center">You have no favourite movies yet.</p>
+        <p className="mt-10 text-xl text-center">You have no favourite movies yet.</p>
       ) : (
-        <div className="movie-list grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-wrap justify-center gap-10 mt-10">
           {favorites.map((movie) => (
-            <div key={movie.imdbID || movie.Title} className="movie-card p-2 border rounded-lg shadow-md" style={{ maxWidth: '200px' }}>
-              <img src={movie.Poster} alt={movie.Title} className="w-full h-auto" style={{ maxHeight: '200px', objectFit: 'cover' }} />
-              <h3 className="text-sm font-medium mt-2 text-center">{movie.Title}</h3>
-              <p className="text-xs text-center">{movie.Year}</p>
-              <p className="text-xs text-center">Rated: {movie.Rated}</p>
-              <p className="text-xs text-center">Released: {movie.Released}</p>
-              <p className="text-xs text-center">Runtime: {movie.Runtime}</p>
+            <div
+              key={movie.imdbID || movie.Title}
+              className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 w-full sm:w-72"
+            >
+            <Link to={`/movie/${movie.imdbID}`}>
+
+              <div className="flex flex-col overflow-hidden rounded-t-lg p-4">
+                <img
+                  src={movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450?text=No+Image"}
+                  alt={movie.Title}
+                  className="min-w-full max-h-80 rounded-md mb-4"
+                />
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 text-center">
+                  {movie.Title} ({movie.Year})
+                </h2>
+                <p className="text-md text-gray-600 dark:text-gray-300 text-center">
+                  Rating: {movie.imdbRating}/10
+                </p>
+              </div>
+            </Link>
+
             </div>
           ))}
         </div>
