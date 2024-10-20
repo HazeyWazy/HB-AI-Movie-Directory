@@ -15,8 +15,7 @@ import SignUp from "./components/SignUp";
 import logo from "./imgs/film-roll.png";
 
 import "./index.css";
-import {apiUrl} from "./config";
-
+import { apiUrl } from "./config";
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -25,15 +24,19 @@ function App() {
   const [username, setUsername] = useState("Guest");
   const navigate = useNavigate();
   const location = useLocation();
-   
+
+  // Initial setup effect
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
     setDarkMode(savedMode);
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
+    if (token) {
+      fetchUserInfo();
+    }
   }, []);
 
-  // Update dark mode
+  // Update dark mode effect
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
     if (darkMode) {
@@ -43,6 +46,7 @@ function App() {
     }
   }, [darkMode]);
 
+  // Search handler
   const handleSearch = async (searchTerm) => {
     try {
       const response = await fetch(
@@ -56,24 +60,39 @@ function App() {
     }
   };
 
+  // Fetch user info function
   const fetchUserInfo = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoggedIn(false);
+        setUsername("Guest");
+        return;
+      }
       const response = await fetch(`${apiUrl}/auth/user`, {
         method: "GET",
         credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
       if (response.ok) {
         const data = await response.json();
         setUsername(data.name);
+        setIsLoggedIn(true);
       } else {
         throw new Error("Failed to fetch user info");
       }
     } catch (error) {
       console.error("Error fetching user info:", error);
+      setIsLoggedIn(false);
       setUsername("Guest");
+      localStorage.removeItem("token");
     }
   };
 
+  // Logout handler
   const handleLogout = async () => {
     try {
       await fetch(`${apiUrl}/auth/logout`, {
@@ -88,6 +107,8 @@ function App() {
       console.error("Error logging out:", error);
     }
   };
+
+  // Add to favourites handler
   const handleAddToFavourites = async (movieId) => {
     console.log("imdbID being added:", movieId);
     try {
@@ -95,10 +116,10 @@ function App() {
       const response = await fetch(`${apiUrl}/favourites`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ movieId}), // Send the imdbID to the backend
+        body: JSON.stringify({ movieId }),
       });
       if (response.ok) {
         console.log(`Movie ${movieId} added to favourites`);
@@ -109,13 +130,17 @@ function App() {
       console.error("Error adding to favourites:", error);
     }
   };
+
+  // Effect to fetch user info on page refresh
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
-      
       {/* Navigation bar */}
       <nav className="flex justify-between items-center py-5 px-4 border-b border-gray-200 dark:border-gray-800">
-
-      {/* Logo */}
+        {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center cursor-pointer">
             <img src={logo} alt="Logo" className="w-7 h-7" />
@@ -124,30 +149,31 @@ function App() {
         </div>
 
         {/* Navigation buttons */}
-<div className="flex items-center">
-  <Link to="/" className="nav-button mr-4">
-    HOME
-  </Link>
+        <div className="flex items-center">
+          <Link to="/" className="nav-button mr-4">
+            HOME
+          </Link>
 
-  {!isLoggedIn ? (
-    <>
-      <Link to="/signin" className="nav-button mr-4">
-        SIGN IN
-      </Link>
-      <Link to="/signup" className="nav-button mr-4">
-        SIGN UP
-      </Link>
-    </>
-  ) : (
-    <>
-      <Link to="/favourites" className="nav-button mr-4">
-        FAVOURITES
-      </Link> {/* Add FAVOURITES link here */}
-      <button onClick={handleLogout} className="nav-button mr-4">
-        LOGOUT
-      </button>
-    </>
-  )}
+          {!isLoggedIn ? (
+            <>
+              <Link to="/signin" className="nav-button mr-4">
+                SIGN IN
+              </Link>
+              <Link to="/signup" className="nav-button mr-4">
+                SIGN UP
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/favourites" className="nav-button mr-4">
+                FAVOURITES
+              </Link>{" "}
+              {/* Add FAVOURITES link here */}
+              <button onClick={handleLogout} className="nav-button mr-4">
+                LOGOUT
+              </button>
+            </>
+          )}
 
           {/* light/dark mode toggle */}
           <button onClick={() => setDarkMode(!darkMode)}>
@@ -159,7 +185,7 @@ function App() {
                 fill="#ffffff"
                 className="w-6 h-6 hover:fill-orange-300"
               >
-                <path d='M12,17c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5Zm0-8c-1.65,0-3,1.35-3,3s1.35,3,3,3,3-1.35,3-3-1.35-3-3-3Zm1-5V1c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1Zm0,19v-3c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1ZM5,12c0-.55-.45-1-1-1H1c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm19,0c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1ZM6.71,6.71c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm14,14c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm-16,0l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29ZM18.71,6.71l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Z' />              
+                <path d="M12,17c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5Zm0-8c-1.65,0-3,1.35-3,3s1.35,3,3,3,3-1.35,3-3-1.35-3-3-3Zm1-5V1c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1Zm0,19v-3c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1ZM5,12c0-.55-.45-1-1-1H1c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm19,0c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1ZM6.71,6.71c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm14,14c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm-16,0l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29ZM18.71,6.71l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Z" />
               </svg>
             ) : (
               // moon stars icon
@@ -170,13 +196,13 @@ function App() {
                 className="w-6 h-6 hover:fill-blue-700"
               >
                 <g>
-                  <path d='M13.273,5.865l.831,.303c.328,.12,.586,.373,.707,.693l.307,.82c.146,.391,.519,.65,.936,.65h0c.417,0,.79-.258,.937-.649l.307-.818c.122-.322,.38-.576,.708-.695l.831-.303c.395-.144,.657-.52,.657-.939s-.263-.795-.657-.939l-.831-.303c-.328-.12-.586-.373-.707-.694l-.308-.82c-.146-.391-.52-.649-.937-.649h0c-.417,0-.79,.259-.936,.65l-.306,.817c-.122,.322-.38,.576-.708,.695l-.831,.303c-.395,.144-.657,.52-.657,.939s.263,.795,.657,.939Z' />
-                  <path d='M22.386,12.003c-.402-.168-.87-.056-1.151,.279-.928,1.106-2.507,1.621-4.968,1.621-3.814,0-6.179-1.03-6.179-6.158,0-2.397,.532-4.019,1.626-4.957,.33-.284,.439-.749,.269-1.15-.17-.4-.571-.646-1.015-.604C5.285,1.572,1,6.277,1,11.977c0,6.062,4.944,10.994,11.022,10.994,5.72,0,10.438-4.278,10.973-9.951,.042-.436-.205-.848-.609-1.017Zm-10.363,8.967c-4.975,0-9.022-4.035-9.022-8.994,0-3.827,2.362-7.105,5.78-8.402-.464,1.134-.692,2.517-.692,4.17,0,7.312,4.668,8.158,8.179,8.158,1.216,0,2.761-.094,4.177-.673-1.306,3.396-4.588,5.74-8.421,5.74Z' />
+                  <path d="M13.273,5.865l.831,.303c.328,.12,.586,.373,.707,.693l.307,.82c.146,.391,.519,.65,.936,.65h0c.417,0,.79-.258,.937-.649l.307-.818c.122-.322,.38-.576,.708-.695l.831-.303c.395-.144,.657-.52,.657-.939s-.263-.795-.657-.939l-.831-.303c-.328-.12-.586-.373-.707-.694l-.308-.82c-.146-.391-.52-.649-.937-.649h0c-.417,0-.79,.259-.936,.65l-.306,.817c-.122,.322-.38,.576-.708,.695l-.831,.303c-.395,.144-.657,.52-.657,.939s.263,.795,.657,.939Z" />
+                  <path d="M22.386,12.003c-.402-.168-.87-.056-1.151,.279-.928,1.106-2.507,1.621-4.968,1.621-3.814,0-6.179-1.03-6.179-6.158,0-2.397,.532-4.019,1.626-4.957,.33-.284,.439-.749,.269-1.15-.17-.4-.571-.646-1.015-.604C5.285,1.572,1,6.277,1,11.977c0,6.062,4.944,10.994,11.022,10.994,5.72,0,10.438-4.278,10.973-9.951,.042-.436-.205-.848-.609-1.017Zm-10.363,8.967c-4.975,0-9.022-4.035-9.022-8.994,0-3.827,2.362-7.105,5.78-8.402-.464,1.134-.692,2.517-.692,4.17,0,7.312,4.668,8.158,8.179,8.158,1.216,0,2.761-.094,4.177-.673-1.306,3.396-4.588,5.74-8.421,5.74Z" />
                 </g>
                 <g>
-                  <circle cx='18.49' cy='11.349' r='1' />
-                  <circle cx='13.99' cy='10.766' r='1' />
-                </g>              
+                  <circle cx="18.49" cy="11.349" r="1" />
+                  <circle cx="13.99" cy="10.766" r="1" />
+                </g>
               </svg>
             )}
           </button>
@@ -196,7 +222,10 @@ function App() {
             element={
               <div>
                 <SearchBar onSearch={handleSearch} />
-                <MovieList movies={movies} onAddToFavourites={handleAddToFavourites} />
+                <MovieList
+                  movies={movies}
+                  onAddToFavourites={handleAddToFavourites}
+                />
               </div>
             }
           />
@@ -212,7 +241,7 @@ function App() {
             }
           />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
-          <Route path="/favourites" element={<Favourites />}/>
+          <Route path="/favourites" element={<Favourites />} />
         </Routes>
       </main>
     </div>
