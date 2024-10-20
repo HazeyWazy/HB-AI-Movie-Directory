@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require('path');
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -22,17 +23,21 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
 // const watchlistRoutes = require('./routes/watchlistRoutes');
 const movieRoutes = require("./routes/movieRoutes");
 const favouritesRoutes = require("./routes/favouritesRoutes");
+const profileRoutes = require('./routes/profileRoutes');
 
 app.use("/api/auth", authRoutes);
 // app.use('/api/watchlists', watchlistRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api", favouritesRoutes);
+app.use('/api', profileRoutes);
 
 // MongoDB connection
 mongoose

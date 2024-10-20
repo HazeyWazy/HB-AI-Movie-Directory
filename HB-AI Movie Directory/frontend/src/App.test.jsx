@@ -76,12 +76,30 @@ describe("App Component", () => {
   });
 
   it("shows logout when logged in", async () => {
-    localStorage.setItem("token", "fake-token");
+    // Mock localStorage.getItem to return a token
+    const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+    getItemSpy.mockReturnValue('fake-token');
+
+    // Mock the fetch function to return user data
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ name: "Test User" }),
+      })
+    );
+
     await act(async () => {
       renderApp();
     });
+
+    // Wait for the async operations to complete
+    await screen.findByText(/LOGOUT/i);
+
     expect(screen.getByText(/LOGOUT/i)).toBeDefined();
     expect(screen.queryByText(/SIGN IN/i)).toBeNull();
     expect(screen.queryByText(/SIGN UP/i)).toBeNull();
+
+    // Clean up the spy
+    getItemSpy.mockRestore();
   });
 });
