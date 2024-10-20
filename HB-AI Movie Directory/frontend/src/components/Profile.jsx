@@ -67,14 +67,12 @@ const Profile = () => {
         body: formData,
       });
       if (response.ok) {
-        
         const data = await response.json();
-        console.log(data)
         setUser((prevUser) => ({
           ...prevUser,
           profilePicture: data.profilePicture,
         }));
-        // Dispatch the event with just the path, not the full URL
+        // Dispatch event with the Cloudinary URL
         window.dispatchEvent(
           new CustomEvent("profilePictureUpdated", {
             detail: data.profilePicture,

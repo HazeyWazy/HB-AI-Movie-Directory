@@ -6,10 +6,7 @@ exports.getProfile = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      // Construct full URL for profile picture
-      if (user.profilePicture) {
-        user.profilePicture = `${req.protocol}://${req.get('host')}/${user.profilePicture}`;
-      }
+      // Send the profile picture URL as is, without modifying it
       res.json(user);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -35,24 +32,22 @@ exports.updateProfile = async (req, res) => {
 };
 
 exports.uploadProfilePicture = async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
-      
-      const user = await User.findById(req.user.userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      // Store the relative path
-      user.profilePicture = `uploads/${req.file.filename}`;
-      await user.save();
-      
-      // Return the full URL in the response
-      const fullUrl = `${req.protocol}://${req.get('host')}/${user.profilePicture}`;
-      res.json({ message: "Profile picture uploaded successfully", profilePicture: fullUrl });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
-  };
+    
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Store only the Cloudinary URL
+    user.profilePicture = req.file.path;
+    await user.save();
+    
+    res.json({ message: "Profile picture uploaded successfully", profilePicture: user.profilePicture });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
