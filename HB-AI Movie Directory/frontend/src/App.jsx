@@ -12,16 +12,18 @@ import MovieDetail from "./components/MovieDetail";
 import Favourites from "./components/Favourites";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
+import Profile from "./components/Profile";
 import logo from "./imgs/film-roll.png";
 
 import "./index.css";
-import { apiUrl } from "./config";
+import { apiUrl, deployUrl } from "./config";
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("Guest");
+  const [profilePicture, setProfilePicture] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -46,6 +48,30 @@ function App() {
     }
   }, [darkMode]);
 
+  // Profile picture update listener
+  useEffect(() => {
+    const handleProfilePictureUpdate = (event) => {
+      // Ensure we're using the full URL here
+      setProfilePicture(event.detail ? `${apiUrl}/${event.detail}` : "");
+      console.log(
+        "Profile picture updated to:",
+        event.detail ? `${apiUrl}/${event.detail}` : ""
+      );
+    };
+
+    window.addEventListener(
+      "profilePictureUpdated",
+      handleProfilePictureUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "profilePictureUpdated",
+        handleProfilePictureUpdate
+      );
+    };
+  }, []);
+
   // Search handler
   const handleSearch = async (searchTerm) => {
     try {
@@ -67,6 +93,7 @@ function App() {
       if (!token) {
         setIsLoggedIn(false);
         setUsername("Guest");
+        setProfilePicture("");
         return;
       }
       const response = await fetch(`${apiUrl}/auth/user`, {
@@ -79,8 +106,17 @@ function App() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log("User data:", data); // Log the entire user data
         setUsername(data.name);
         setIsLoggedIn(true);
+        // Construct the full URL for the profile picture
+        setProfilePicture(
+          data.profilePicture ? `${deployUrl}/${data.profilePicture}` : ""
+        );
+        console.log(
+          "Profile picture set to:",
+          data.profilePicture ? `${apiUrl}/${data.profilePicture}` : ""
+        ); // Log the full profile picture URL
       } else {
         throw new Error("Failed to fetch user info");
       }
@@ -88,6 +124,7 @@ function App() {
       console.error("Error fetching user info:", error);
       setIsLoggedIn(false);
       setUsername("Guest");
+      setProfilePicture("");
       localStorage.removeItem("token");
     }
   };
@@ -102,6 +139,7 @@ function App() {
       localStorage.removeItem("token");
       setIsLoggedIn(false);
       setUsername("Guest");
+      setProfilePicture(""); // Clear profile picture on logout
       navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -130,11 +168,6 @@ function App() {
       console.error("Error adding to favourites:", error);
     }
   };
-
-  // Effect to fetch user info on page refresh
-  useEffect(() => {
-    fetchUserInfo();
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
@@ -168,10 +201,17 @@ function App() {
               <Link to="/favourites" className="nav-button mr-4">
                 FAVOURITES
               </Link>{" "}
-              {/* Add FAVOURITES link here */}
               <button onClick={handleLogout} className="nav-button mr-4">
                 LOGOUT
               </button>
+              {/* Profile picture link */}
+              <Link to="/profile" className="mr-4">
+                <img
+                  src={profilePicture || "https://via.placeholder.com/40"}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
+                />
+              </Link>
             </>
           )}
 
@@ -242,6 +282,7 @@ function App() {
           />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
           <Route path="/favourites" element={<Favourites />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
     </div>
