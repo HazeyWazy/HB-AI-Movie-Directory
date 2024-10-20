@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import PropTypes from "prop-types";
 import "../index.css";
 import {apiUrl} from "../config";
-const MovieDetail = () => {
+
+const MovieDetail = ({ onAddToFavourites }) => {
   const [movie, setMovie] = useState(null);
   const { id } = useParams();
 
@@ -34,14 +36,14 @@ const MovieDetail = () => {
   return (
     <div className="bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white py-12 px-4">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
-        <div className="md:w-1/2">
+        <div className="md:w-2/5">
           <img
             src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}
             alt={movie.Title}
-            className="mx-auto rounded-lg shadow-md"
+            className=" mx-auto rounded-lg shadow-md"
           />
         </div>
-        <div className="md:w-1/2 md:ml-10 mt-8 md:mt-0">
+        <div className="md:w-3/5 md:ml-10 mt-8 md:mt-0">
           <h1 className="text-4xl font-bold mb-4">{movie.Title}</h1>
           <p className="mb-2">
             <strong>Director:</strong> {movie.Director}
@@ -59,10 +61,25 @@ const MovieDetail = () => {
             <strong>Rating:</strong> {movie.imdbRating} / 10
           </p>
           <p className="mb-4 text-lg">{movie.Plot}</p>
+
+          {/* Add to Favourites Button */}
+          <div className="pt-4">
+            <button
+              onClick={() => onAddToFavourites(movie.imdbID)} // Pass the movie's imdbID to the function
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300 w-full"
+            >
+              Add to Favourites
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
+};
+
+// propTypes validation
+MovieDetail.propTypes = {
+  onAddToFavourites: PropTypes.func.isRequired, // Function to handle adding to favourites
 };
 
 export default MovieDetail;

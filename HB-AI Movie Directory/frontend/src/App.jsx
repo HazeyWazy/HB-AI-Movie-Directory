@@ -222,14 +222,11 @@ function App() {
             element={
               <div>
                 <SearchBar onSearch={handleSearch} />
-                <MovieList
-                  movies={movies}
-                  onAddToFavourites={handleAddToFavourites}
-                />
+                <MovieList movies={movies} />
               </div>
             }
           />
-          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/movie/:id" element={<MovieDetail onAddToFavourites={handleAddToFavourites} />} />
           <Route
             path="/signin"
             element={
