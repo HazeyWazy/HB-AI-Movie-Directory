@@ -36,7 +36,7 @@ const MovieDetail = () => {
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
         <div className="md:w-1/2">
           <img
-            src={movie.Poster}
+            src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Image'}
             alt={movie.Title}
             className="mx-auto rounded-lg shadow-md"
           />

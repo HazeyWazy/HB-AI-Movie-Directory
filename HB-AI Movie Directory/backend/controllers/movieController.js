@@ -1,5 +1,5 @@
-const OpenAI = require('openai');
 const { fetchMovieByTitle, fetchMovieDetailsById } = require('../services/movieService');
+const OpenAI = require('openai');
 
 const openai = new OpenAI({
   apiKey: process.env.CHAT_GPT_API,

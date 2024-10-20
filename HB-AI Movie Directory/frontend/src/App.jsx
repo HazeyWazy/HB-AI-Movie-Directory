@@ -212,7 +212,7 @@ function App() {
             }
           />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
-          <Route path="/favourites" element={<Favourites />} />
+          <Route path="/favourites" element={<Favourites />}/>
         </Routes>
       </main>
     </div>
