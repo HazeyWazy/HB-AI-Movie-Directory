@@ -9,10 +9,14 @@ import {
 import SearchBar from "./components/SearchBar";
 import MovieList from "./components/MovieList";
 import MovieDetail from "./components/MovieDetail";
+import Favourites from "./components/Favourites";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import logo from "./imgs/film-roll.png";
+
 import "./index.css";
+import {apiUrl} from "./config";
+
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -21,8 +25,7 @@ function App() {
   const [username, setUsername] = useState("Guest");
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Initialize dark mode and check login status
+   
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
     setDarkMode(savedMode);
@@ -43,7 +46,7 @@ function App() {
   const handleSearch = async (searchTerm) => {
     try {
       const response = await fetch(
-        `https://group-project-gwdp-monday-12pm.onrender.com/api/movies/suggestMoviesAI?userPrompt=${searchTerm}`
+        `${apiUrl}/movies/suggestMoviesAI?userPrompt=${searchTerm}`
       );
       const data = await response.json();
       console.log(data);
@@ -55,7 +58,7 @@ function App() {
 
   const fetchUserInfo = async () => {
     try {
-      const response = await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/user", {
+      const response = await fetch(`${apiUrl}/auth/user`, {
         method: "GET",
         credentials: "include",
       });
@@ -73,7 +76,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/logout", {
+      await fetch(`${apiUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -85,7 +88,27 @@ function App() {
       console.error("Error logging out:", error);
     }
   };
-
+  const handleAddToFavourites = async (movieId) => {
+    console.log("imdbID being added:", movieId);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${apiUrl}/favourites`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ movieId}), // Send the imdbID to the backend
+      });
+      if (response.ok) {
+        console.log(`Movie ${movieId} added to favourites`);
+      } else {
+        throw new Error("Failed to add movie to favourites");
+      }
+    } catch (error) {
+      console.error("Error adding to favourites:", error);
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       
@@ -101,25 +124,30 @@ function App() {
         </div>
 
         {/* Navigation buttons */}
-        <div className="flex items-center">
-          <Link to="/" className="nav-button mr-4">
-            HOME
-          </Link>
+<div className="flex items-center">
+  <Link to="/" className="nav-button mr-4">
+    HOME
+  </Link>
 
-          {!isLoggedIn ? (
-            <>
-              <Link to="/signin" className="nav-button mr-4">
-                SIGN IN
-              </Link>
-              <Link to="/signup" className="nav-button mr-4">
-                SIGN UP
-              </Link>
-            </>
-          ) : (
-            <button onClick={handleLogout} className="nav-button mr-4">
-              LOGOUT
-            </button>
-          )}
+  {!isLoggedIn ? (
+    <>
+      <Link to="/signin" className="nav-button mr-4">
+        SIGN IN
+      </Link>
+      <Link to="/signup" className="nav-button mr-4">
+        SIGN UP
+      </Link>
+    </>
+  ) : (
+    <>
+      <Link to="/favourites" className="nav-button mr-4">
+        FAVOURITES
+      </Link> {/* Add FAVOURITES link here */}
+      <button onClick={handleLogout} className="nav-button mr-4">
+        LOGOUT
+      </button>
+    </>
+  )}
 
           {/* light/dark mode toggle */}
           <button onClick={() => setDarkMode(!darkMode)}>
@@ -168,7 +196,7 @@ function App() {
             element={
               <div>
                 <SearchBar onSearch={handleSearch} />
-                <MovieList movies={movies} />
+                <MovieList movies={movies} onAddToFavourites={handleAddToFavourites} />
               </div>
             }
           />
@@ -184,6 +212,7 @@ function App() {
             }
           />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
+          <Route path="/favourites" element={<Favourites />} />
         </Routes>
       </main>
     </div>

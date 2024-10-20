@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import PropTypes from 'prop-types';
 import movies from '../imgs/movies.jpeg';
+import {apiUrl} from "../config";
+
 
 const SignUp = ({ darkMode }) => {
   const [name, setName] = useState("");
@@ -19,7 +21,7 @@ const SignUp = ({ darkMode }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://group-project-gwdp-monday-12pm.onrender.com/api/auth/register", {
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),

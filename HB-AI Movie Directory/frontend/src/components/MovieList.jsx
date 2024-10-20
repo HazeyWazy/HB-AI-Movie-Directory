@@ -1,31 +1,41 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import "../index.css";
 
-const MovieList = ({ movies }) => {
+const MovieList = ({ movies, onAddToFavourites }) => {
   return (
     <div className="flex flex-wrap justify-center gap-10 mt-10 px-4 py-6">
       {movies.map((movie) => (
-        <Link
-          to={`/movie/${movie.imdbID}`}
+        <div
           key={movie.imdbID}
           className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 w-full sm:w-72"
         >
-          <div className="flex flex-col overflow-hidden rounded-t-lg p-4">
-            <img
-              src={movie.Poster}
-              alt={movie.Title}
-              className="min-w-full max-h-80 rounded-md mb-4"
-            />
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {movie.Title}
-            </h2>
-            <p className="text-md text-gray-600 dark:text-gray-300">
-              {movie.Year} • {movie.Type}
-            </p>
+          <Link to={`/movie/${movie.imdbID}`}>
+            <div className="flex flex-col overflow-hidden rounded-t-lg p-4">
+              <img
+                src={movie.Poster}
+                alt={movie.Title}
+                className="min-w-full max-h-80 rounded-md mb-4"
+              />
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                {movie.Title}
+              </h2>
+              <p className="text-md text-gray-600 dark:text-gray-300">
+                {movie.Year} • {movie.Type}
+              </p>
+            </div>
+          </Link>
+
+          {/* Add to Favourites Button */}
+          <div className="p-4">
+            <button
+              onClick={() => onAddToFavourites(movie.imdbID)} // Pass the movie's imdbID to the function
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300 w-full"
+            >
+              Add to Favourites
+            </button>
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   );
@@ -42,6 +52,7 @@ MovieList.propTypes = {
       Type: PropTypes.string.isRequired,
     })
   ).isRequired,
+  onAddToFavourites: PropTypes.func.isRequired, // Function to handle adding to favourites
 };
 
 export default MovieList;
