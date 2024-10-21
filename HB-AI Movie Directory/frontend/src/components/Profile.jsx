@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
 import { useUser } from '../context/UserContext';
+import userLogo from "../imgs/user.png"
 
 const Profile = () => {
   const { user, updateUser } = useUser();
@@ -83,7 +84,7 @@ const Profile = () => {
       </h2>
       <div className="mb-6">
         <img
-          src={user.profilePicture || "https://via.placeholder.com/150"}
+          src={user.profilePicture || userLogo}
           alt="Profile"
           className="w-32 h-32 rounded-full mx-auto mb-4"
         />

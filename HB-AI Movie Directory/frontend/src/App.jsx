@@ -15,6 +15,7 @@ import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
 import { useUser } from "./context/UserContext";
 import logo from "./imgs/film-roll.png";
+import userLogo from "./imgs/user.png"
 
 import "./index.css";
 import { apiUrl } from "./config";
@@ -134,7 +135,7 @@ function App() {
               {/* Profile picture link */}
               <Link to="/profile" className="mr-4">
                 <img
-                  src={user?.profilePicture || "https://via.placeholder.com/40"}
+                  src={user?.profilePicture || userLogo}
                   alt="Profile"
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
                 />
