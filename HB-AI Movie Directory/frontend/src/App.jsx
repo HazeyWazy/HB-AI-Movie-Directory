@@ -10,6 +10,8 @@ import SearchBar from "./components/SearchBar";
 import MovieList from "./components/MovieList";
 import MovieDetail from "./components/MovieDetail";
 import Favourites from "./components/Favourites";
+import Watchlist from "./components/Watchlist";
+import WatchlistDetail from "./components/WatchlistDetail";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
@@ -23,10 +25,10 @@ import { apiUrl } from "./config";
 function App() {
   const [movies, setMovies] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+  const [favorites, setFavorites] = useState([]);
   const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-
   // Initial setup effect
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
@@ -97,6 +99,50 @@ function App() {
     }
   };
 
+  // Remove from favourites handler
+  const handleRemoveFromFavourites = async (movieId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${apiUrl}/favourites/${movieId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        setFavorites(prev => prev.filter(movie => movie.imdbID !== movieId));
+        console.log(`Movie ${movieId} removed from favourites`);
+      } else {
+        throw new Error("Failed to remove movie from favourites");
+      }
+    } catch (error) {
+      console.error("Error removing from favourites:", error);
+    }
+  };
+
+   // Add to watchlist handler
+   const handleAddToWatchlist = async (watchlistId, movieId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${apiUrl}/watchlist/add`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ watchlistId, movieId }),
+      });
+      if (response.ok) {
+        console.log(`Movie ${movieId} added to watchlist ${watchlistId}`);
+      } else {
+        throw new Error("Failed to add movie to watchlist");
+      }
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       {/* Navigation bar */}
@@ -128,7 +174,10 @@ function App() {
             <>
               <Link to="/favourites" className="nav-button mr-4">
                 FAVOURITES
-              </Link>{" "}
+              </Link>
+              <Link to="/watchlist" className="nav-button mr-4">
+                WATCHLIST
+              </Link>
               <button onClick={handleLogout} className="nav-button mr-4">
                 LOGOUT
               </button>
@@ -194,10 +243,21 @@ function App() {
               </div>
             }
           />
-          <Route path="/movie/:id" element={<MovieDetail onAddToFavourites={handleAddToFavourites} />} />
+          <Route 
+            path="/movie/:id" 
+            element={
+              <MovieDetail 
+                onAddToFavourites={handleAddToFavourites}
+                onRemoveFromFavourites={handleRemoveFromFavourites}
+                onAddToWatchlist={handleAddToWatchlist}
+              />
+            } 
+          />
           <Route path="/signin" element={<SignIn darkMode={darkMode} />} />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
           <Route path="/favourites" element={<Favourites />} />
+          <Route path="/watchlist" element={<Watchlist />} />
+          <Route path="/watchlist/:id" element={<WatchlistDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
