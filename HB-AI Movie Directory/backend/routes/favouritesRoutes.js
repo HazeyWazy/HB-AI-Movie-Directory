@@ -10,7 +10,7 @@ const authMiddleware = require("../middleware/authenticateToken");
 const router = express.Router();
 
 router.post("/favourites", authMiddleware, addFavorite);
-router.delete("/favourites", authMiddleware, removeFavorite);
+router.delete("/favourites/:movieId", authMiddleware, removeFavorite); 
 router.get("/favourites", authMiddleware, getFavorites);
 
 module.exports = router;

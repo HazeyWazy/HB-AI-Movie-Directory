@@ -28,16 +28,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
-// const watchlistRoutes = require('./routes/watchlistRoutes');
 const movieRoutes = require("./routes/movieRoutes");
 const favouritesRoutes = require("./routes/favouritesRoutes");
 const profileRoutes = require('./routes/profileRoutes');
+const watchlistRoutes = require('./routes/watchlistRoutes'); // Add this line
 
 app.use("/api/auth", authRoutes);
-// app.use('/api/watchlists', watchlistRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api", favouritesRoutes);
 app.use('/api', profileRoutes);
+app.use('/api', watchlistRoutes); // Add this line
 
 // MongoDB connection
 mongoose

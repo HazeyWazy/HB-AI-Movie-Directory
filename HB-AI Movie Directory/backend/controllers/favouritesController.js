@@ -34,7 +34,7 @@ exports.addFavorite = async (req, res) => {
 };
 
 exports.removeFavorite = async (req, res) => {
-  const { movieId } = req.body;
+  const { movieId } = req.params; // Changed from req.body to req.params
   const userId = req.user.userId;
 
   if (!movieId) {
@@ -70,7 +70,7 @@ exports.getFavorites = async (req, res) => {
     const favorites = await Favorites.findOne({ userId });
 
     if (!favorites || favorites.movies.length === 0) {
-      return res.status(202).json({ message: "No favorites found" });
+      return res.status(200).json({ favorites: [] }); // Changed to 200 status and empty array
     }
 
     const movieDetailsPromises = favorites.movies.map(fetchMovieDetailsById);
