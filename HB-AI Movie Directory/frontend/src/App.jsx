@@ -146,7 +146,7 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       {/* Navigation bar */}
-      <nav className="flex justify-between items-center py-5 px-4 border-b border-gray-200 dark:border-gray-800">
+      <nav className="flex justify-between items-center h-[4.28rem] px-4 border-b border-gray-200 dark:border-gray-800">
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center cursor-pointer">
@@ -186,7 +186,7 @@ function App() {
                 <img
                   src={user?.profilePicture || userLogo}
                   alt="Profile"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
                 />
               </Link>
             </>
