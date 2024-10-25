@@ -15,14 +15,7 @@ const MovieDetail = ({
   const [selectedWatchlist, setSelectedWatchlist] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { id } = useParams();
-
-  useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
 
   useEffect(() => {
     const fetchMovieDetail = async () => {
@@ -36,43 +29,40 @@ const MovieDetail = ({
         const data = await response.json();
         setMovie(data);
 
-        // Only fetch user-specific data if logged in
-        if (isLoggedIn) {
-          // Fetch user's watchlists
-          const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "application/json",
-            },
-          });
+        // Fetch user's watchlists
+        const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-          if (watchlistsResponse.ok) {
-            const watchlistsData = await watchlistsResponse.json();
-            setWatchlists(watchlistsData.watchlists || []);
-          }
+        if (watchlistsResponse.ok) {
+          const watchlistsData = await watchlistsResponse.json();
+          setWatchlists(watchlistsData.watchlists || []);
+        }
 
-          // Check if the movie is in favorites
-          const favouritesResponse = await fetch(`${apiUrl}/favourites`, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "application/json",
-            },
-          });
+        // Check if the movie is in favorites
+        const favouritesResponse = await fetch(`${apiUrl}/favourites`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-          if (favouritesResponse.ok) {
-            const favouritesData = await favouritesResponse.json();
-            if (favouritesData && favouritesData.favorites) {
-              setIsFavourite(
-                favouritesData.favorites.some((fav) => fav.imdbID === id)
-              );
-            } else {
-              setIsFavourite(false);
-            }
+        if (favouritesResponse.ok) {
+          const favouritesData = await favouritesResponse.json();
+          if (favouritesData && favouritesData.favorites) {
+            setIsFavourite(
+              favouritesData.favorites.some((fav) => fav.imdbID === id)
+            );
           } else {
             setIsFavourite(false);
           }
+        } else {
+          setIsFavourite(false);
         }
       } catch (error) {
         console.error("Error fetching movie details or watchlists:", error);
@@ -83,7 +73,7 @@ const MovieDetail = ({
     };
 
     fetchMovieDetail();
-  }, [id, isLoggedIn]);
+  }, [id]);
 
   const handleFavouriteChange = async () => {
     try {
@@ -125,7 +115,9 @@ const MovieDetail = ({
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
         <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-orange-300 border-t-gray-300"></div>
-        <p className="mt-4 text-lg text-slate-900 dark:text-white">Loading...</p>
+        <p className="mt-4 text-lg text-slate-900 dark:text-white">
+          Loading...
+        </p>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Rolling out the details, just for you
         </p>
@@ -144,7 +136,9 @@ const MovieDetail = ({
   if (!movie) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
-        <p className="text-xl text-slate-900 dark:text-white">Movie not found</p>
+        <p className="text-xl text-slate-900 dark:text-white">
+          Movie not found
+        </p>
       </div>
     );
   }
@@ -202,101 +196,91 @@ const MovieDetail = ({
 
           <p className="mb-4 text-lg">{movie.Plot}</p>
 
-          {isLoggedIn ? (
-            <>
-              {/* Add to Favourites Button */}
-              <div className="pt-4 w-full max-w-52">
-                <input
-                  type="checkbox"
-                  id="favorite"
-                  name="favorite-checkbox"
-                  className="hidden peer"
-                  checked={isFavourite}
-                  onChange={handleFavouriteChange}
-                />
-                <label
-                  htmlFor="favorite"
-                  className="bg-white flex items-center gap-2 p-3 cursor-pointer select-none rounded-lg shadow-lg text-black w-full"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`flex-shrink-0 transition-all duration-100 ${
-                      isFavourite ? "fill-red-500 stroke-red-500" : ""
-                    }`}
+          {/* Add to Favourites Button */}
+          <div className="pt-4 w-full max-w-52">
+            <input
+              type="checkbox"
+              id="favorite"
+              name="favorite-checkbox"
+              className="hidden peer"
+              checked={isFavourite}
+              onChange={handleFavouriteChange}
+            />
+            <label
+              htmlFor="favorite"
+              className="bg-white flex items-center gap-2 p-3 cursor-pointer select-none rounded-lg shadow-lg text-black w-full"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 -2 22 28"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`flex-shrink-0 transition-all duration-100 ${
+                  isFavourite ? "fill-red-500 stroke-red-500" : ""
+                }`}
+              >
+                <path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z"/>
+              </svg>
+              <div className="relative overflow-hidden flex-grow">
+                <div className="transition-all duration-500 transform flex flex-col h-6">
+                  <span
+                    className={`transition-all duration-500 transform ${
+                      isFavourite
+                        ? "-translate-y-full opacity-0"
+                        : "translate-y-0 opacity-100"
+                    } whitespace-nowrap`}
                   >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                  </svg>
-                  <div className="relative overflow-hidden flex-grow">
-                    <div className="transition-all duration-500 transform flex flex-col h-6">
-                      <span
-                        className={`transition-all duration-500 transform ${
-                          isFavourite
-                            ? "-translate-y-full opacity-0"
-                            : "translate-y-0 opacity-100"
-                        } whitespace-nowrap`}
-                      >
-                        Add to Favourites
-                      </span>
-                      <span
-                        className={`transition-all duration-500 transform ${
-                          isFavourite
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-full opacity-0"
-                        } whitespace-nowrap absolute top-0 left-0`}
-                      >
-                        Added to Favourites
-                      </span>
-                      <span
-                        className={`transition-all duration-500 transform ${
-                          isFavourite
-                            ? "-translate-y-6 opacity-0"
-                            : "translate-y-full opacity-0"
-                        } whitespace-nowrap absolute top-0 left-0`}
-                      >
-                        Added to Favourites
-                      </span>
-                    </div>
-                  </div>
-                </label>
+                    Add to Favourites
+                  </span>
+                  <span
+                    className={`transition-all duration-500 transform ${
+                      isFavourite
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-full opacity-0"
+                    } whitespace-nowrap absolute top-0 left-0`}
+                  >
+                    Added to Favourites
+                  </span>
+                  <span
+                    className={`transition-all duration-500 transform ${
+                      isFavourite
+                        ? "-translate-y-6 opacity-0"
+                        : "translate-y-full opacity-0"
+                    } whitespace-nowrap absolute top-0 left-0`}
+                  >
+                    Added to Favourites
+                  </span>
+                </div>
               </div>
+            </label>
+          </div>
 
-              {/* Add to Watchlist Dropdown */}
-              <div className="pt-4 max-w-56">
-                <select
-                  value={selectedWatchlist}
-                  onChange={(e) => setSelectedWatchlist(e.target.value)}
-                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                >
-                  <option value="">Select a watchlist</option>
-                  {watchlists.map((watchlist) => (
-                    <option key={watchlist._id} value={watchlist._id}>
-                      {watchlist.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleAddToWatchlist}
-                  className="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full"
-                >
-                  Add to Selected Watchlist
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="pt-4">
-              <p className="text-slate-600 dark:text-slate-400">
-                Please log in to add this movie to your favourites or watchlist
-              </p>
-            </div>
-          )}
+          {/* Add to Watchlist Dropdown */}
+          <div className="pt-4 max-w-56">
+            <select
+              value={selectedWatchlist}
+              onChange={(e) => setSelectedWatchlist(e.target.value)}
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            >
+              <option value="">Select a watchlist</option>
+              {watchlists.map((watchlist) => (
+                <option key={watchlist._id} value={watchlist._id}>
+                  {watchlist.name}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleAddToWatchlist}
+              className="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full"
+            >
+              Add to Selected Watchlist
+            </button>
+          </div>
         </div>
       </div>
     </div>
