@@ -5,6 +5,7 @@ import {
   Link,
   useNavigate,
   useLocation,
+  useSearchParams,
 } from "react-router-dom";
 import SearchBar from "./components/SearchBar";
 import MovieList from "./components/MovieList";
@@ -23,13 +24,22 @@ import "./index.css";
 import { apiUrl } from "./config";
 
 function App() {
-  const [movies, setMovies] = useState([]);
+  // Also update the movies state initialization
+  const [movies, setMovies] = useState(() => {
+    // Only initialize from sessionStorage if this is not a page refresh
+    if (performance.navigation.type !== 1) {
+      const savedMovies = sessionStorage.getItem("searchResults");
+      return savedMovies ? JSON.parse(savedMovies) : [];
+    }
+    return [];
+  });
   const [darkMode, setDarkMode] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSearching, setIsSearching] = useState(false);
+
   // Initial setup effect
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
@@ -46,38 +56,74 @@ function App() {
     }
   }, [darkMode]);
 
+  // Add this effect to handle page refresh
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      sessionStorage.clear();
+    };
+
+    // Clear everything on page load if it's a refresh
+    if (performance.navigation.type === 1) {
+      sessionStorage.clear();
+      setMovies([]);
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   // Movie Search Handler
   const handleSearch = async (searchTerm) => {
+    // If there are already results in sessionStorage for this search term, use them
+    const savedResults = sessionStorage.getItem("searchResults");
+    const savedTerm = sessionStorage.getItem("searchTerm");
+
+    if (savedResults && savedTerm === searchTerm) {
+      setMovies(JSON.parse(savedResults));
+      return;
+    }
+
     setIsSearching(true);
     try {
       const response = await fetch(
-        `${apiUrl}/movies/suggestAndFetch?userPrompt=${encodeURIComponent(searchTerm)}`
+        `${apiUrl}/movies/suggestAndFetch?userPrompt=${encodeURIComponent(
+          searchTerm
+        )}`
       );
-      
+
       if (!response.ok) {
-        throw new Error('Search failed');
+        throw new Error("Search failed");
       }
-  
+
       const data = await response.json();
-      
+
       // Process and normalize the results
       const processedMovies = (data.results || [])
-        .map(movie => ({
+        .map((movie) => ({
           imdbID: movie.imdbID || movie.id?.toString(),
           Title: movie.Title || movie.title,
-          Year: movie.Year || movie.release_date?.split('-')[0] || 'N/A',
-          Poster: movie.Poster || (movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'N/A'),
-          Type: 'movie',
-          Plot: movie.Plot || movie.overview || 'N/A',
-          Rating: movie.imdbRating || movie.vote_average || 'N/A',
-          Popularity: movie.popularity || 0
+          Year: movie.Year || movie.release_date?.split("-")[0] || "N/A",
+          Poster:
+            movie.Poster ||
+            (movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : "N/A"),
+          Type: "movie",
+          Plot: movie.Plot || movie.overview || "N/A",
+          Rating: movie.imdbRating || movie.vote_average || "N/A",
+          Popularity: movie.popularity || 0,
         }))
-        .filter(movie => movie.Poster !== 'N/A' && movie.Title);
-  
+        .filter((movie) => movie.Poster !== "N/A" && movie.Title);
+
       setMovies(processedMovies);
+      // Save to sessionStorage with the search term
+      sessionStorage.setItem("searchResults", JSON.stringify(processedMovies));
+      sessionStorage.setItem("searchTerm", searchTerm);
     } catch (error) {
       console.error("Error fetching movies:", error);
       setMovies([]);
+      sessionStorage.removeItem("searchResults");
+      sessionStorage.removeItem("searchTerm");
     } finally {
       setIsSearching(false);
     }
@@ -176,17 +222,33 @@ function App() {
       <nav className="flex justify-between items-center h-[4.28rem] px-4 border-b border-gray-200 dark:border-gray-800">
         {/* Logo */}
         <div className="flex items-center">
-          <Link to="/" className="flex items-center cursor-pointer">
+          {/* Changed from Link to anchor tag and added onClick handler */}
+          <a
+            href="/"
+            className="flex items-center cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/";
+            }}
+          >
             <img src={logo} alt="Logo" className="w-7 h-7" />
             <p className="text-center text-lg px-2">HB-AI Movie Directory</p>
-          </Link>
+          </a>
         </div>
 
         {/* Navigation buttons */}
         <div className="flex items-center">
-          <Link to="/" className="nav-button mr-4">
+          {/* Changed from Link to anchor tag for HOME button */}
+          <a
+            href="/"
+            className="nav-button mr-4"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/";
+            }}
+          >
             HOME
-          </Link>
+          </a>
 
           {!isLoggedIn ? (
             <>
