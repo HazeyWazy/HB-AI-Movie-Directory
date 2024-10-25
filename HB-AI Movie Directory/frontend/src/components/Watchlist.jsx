@@ -168,12 +168,22 @@ function Watchlist({ darkMode }) {
       );
     }
 
+    // Create a movies array of length 4 by repeating items as needed
+    let moviesToShow = [...Array(4)].map(
+      (_, i) => watchlist.movies[i % watchlist.movies.length]
+    );
+
+    // If there are exactly 2 unique movies, reverse the second row
+    if (new Set(watchlist.movies).size === 2) {
+      moviesToShow = [moviesToShow[0], moviesToShow[1], moviesToShow[1], moviesToShow[0]];
+    }
+
     return (
-      <div className="grid grid-cols-2 gap-1 h-full">
-        {watchlist.movies.slice(0, 4).map((movieId) => {
+      <div className="grid grid-rows-2 grid-cols-2 gap-1 h-full">
+        {moviesToShow.map((movieId, index) => {
           const movie = movieDetails[movieId];
           return (
-            <div key={movieId} className="w-full h-full">
+            <div key={index} className="w-full h-full">
               {movie ? (
                 <img
                   src={movie.Poster !== "N/A" ? movie.Poster : watchlistIcon}
@@ -189,12 +199,6 @@ function Watchlist({ darkMode }) {
             </div>
           );
         })}
-        {[...Array(Math.max(4 - watchlist.movies.length, 0))].map((_, index) => (
-          <div 
-            key={`empty-${index}`} 
-            className="w-full h-full bg-gray-200 dark:bg-slate-700"
-          />
-        ))}
       </div>
     );
   };
@@ -222,11 +226,11 @@ function Watchlist({ darkMode }) {
       {watchlists.length === 0 ? (
         <p className="mt-10 text-xl text-center">You have no watchlists yet.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+        <div className="flex flex-wrap justify-center gap-7 mt-6">
           {watchlists.map((watchlist) => (
             <div
               key={watchlist._id}
-              className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-6 relative"
+              className="w-64 h-92bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-4 relative"
             >
               <div className="aspect-square mb-4 rounded-lg overflow-hidden">
                 {renderMovieGrid(watchlist)}
