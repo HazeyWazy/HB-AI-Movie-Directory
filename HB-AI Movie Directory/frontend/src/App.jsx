@@ -17,7 +17,7 @@ import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
 import { useUser } from "./context/UserContext";
 import logo from "./imgs/film-roll.png";
-import userLogo from "./imgs/user.png"
+import userLogo from "./imgs/user.png";
 
 import "./index.css";
 import { apiUrl } from "./config";
@@ -29,6 +29,7 @@ function App() {
   const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSearching, setIsSearching] = useState(false);
   // Initial setup effect
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
@@ -45,16 +46,40 @@ function App() {
     }
   }, [darkMode]);
 
-  // Search handler
+  // Movie Search Handler
   const handleSearch = async (searchTerm) => {
+    setIsSearching(true);
     try {
       const response = await fetch(
-        `${apiUrl}/movies/suggestMoviesAI?userPrompt=${searchTerm}`
+        `${apiUrl}/movies/suggestAndFetch?userPrompt=${encodeURIComponent(searchTerm)}`
       );
+      
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+  
       const data = await response.json();
-      setMovies(data.results || []);
+      
+      // Process and normalize the results
+      const processedMovies = (data.results || [])
+        .map(movie => ({
+          imdbID: movie.imdbID || movie.id?.toString(),
+          Title: movie.Title || movie.title,
+          Year: movie.Year || movie.release_date?.split('-')[0] || 'N/A',
+          Poster: movie.Poster || (movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'N/A'),
+          Type: 'movie',
+          Plot: movie.Plot || movie.overview || 'N/A',
+          Rating: movie.imdbRating || movie.vote_average || 'N/A',
+          Popularity: movie.popularity || 0
+        }))
+        .filter(movie => movie.Poster !== 'N/A' && movie.Title);
+  
+      setMovies(processedMovies);
     } catch (error) {
       console.error("Error fetching movies:", error);
+      setMovies([]);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -111,7 +136,9 @@ function App() {
         },
       });
       if (response.ok) {
-        setFavorites(prev => prev.filter(movie => movie.imdbID !== movieId));
+        setFavorites((prev) =>
+          prev.filter((movie) => movie.imdbID !== movieId)
+        );
         console.log(`Movie ${movieId} removed from favourites`);
       } else {
         throw new Error("Failed to remove movie from favourites");
@@ -121,8 +148,8 @@ function App() {
     }
   };
 
-   // Add to watchlist handler
-   const handleAddToWatchlist = async (watchlistId, movieId) => {
+  // Add to watchlist handler
+  const handleAddToWatchlist = async (watchlistId, movieId) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${apiUrl}/watchlist/add`, {
@@ -238,20 +265,20 @@ function App() {
             path="/"
             element={
               <div>
-                <SearchBar onSearch={handleSearch} />
+                <SearchBar onSearch={handleSearch} isLoading={isSearching} />
                 <MovieList movies={movies} />
               </div>
             }
           />
-          <Route 
-            path="/movie/:id" 
+          <Route
+            path="/movie/:id"
             element={
-              <MovieDetail 
+              <MovieDetail
                 onAddToFavourites={handleAddToFavourites}
                 onRemoveFromFavourites={handleRemoveFromFavourites}
                 onAddToWatchlist={handleAddToWatchlist}
               />
-            } 
+            }
           />
           <Route path="/signin" element={<SignIn darkMode={darkMode} />} />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />

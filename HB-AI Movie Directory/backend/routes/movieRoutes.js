@@ -1,17 +1,17 @@
 const express = require('express');
 const {
-  searchMovie,
   getMovieDetails,
-  suggestMoviesAI,
-  suggestAndFetchMoviesAI
+  suggestAndFetchMoviesAI,
+  getRecommendations
 } = require('../controllers/movieController');
 
 const router = express.Router();
 
-// Public routes (no authentication needed)
-router.get('/search', searchMovie);
+// Main search route
+router.get('/suggestAndFetch', suggestAndFetchMoviesAI);
+
+// Movie detail routes
 router.get('/movie/:id', getMovieDetails);
-router.get('/suggest', suggestMoviesAI);
-router.get('/suggestMoviesAI', suggestAndFetchMoviesAI);
+router.get('/movie/:id/recommendations', getRecommendations);
 
 module.exports = router;
