@@ -186,7 +186,7 @@ function App() {
                 <img
                   src={user?.profilePicture || userLogo}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 hover:border-orange-400 transition-colors duration-300"
+                  className="w-10 h-10 rounded-full object-cover border border-gray-300 hover:border-orange-400 transition-colors duration-300"
                 />
               </Link>
             </>
