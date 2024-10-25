@@ -1,28 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
 import { useUser } from '../context/UserContext';
-import userLogo from "../imgs/user.png"
+import userLogo from "../imgs/user.png";
 
 const Profile = () => {
   const { user, updateUser } = useUser();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [file, setFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(user?.profilePicture || userLogo);
+  const [previousImagePreview, setPreviousImagePreview] = useState(null);
   const [alert, setAlert] = useState({ show: false, message: "", type: "" });
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
+      setName(user.name || "");
       setBio(user.bio || "");
+      setImagePreview(user.profilePicture || userLogo);
     }
   }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
     try {
-      const response = await fetch(`${apiUrl}/profile`, {
+      // Create a new user object with updated values
+      const updatedUserData = {
+        ...user,
+        name,
+        bio
+      };
+      
+      // Store the current image preview in case we need to revert
+      setPreviousImagePreview(user.profilePicture);
+      
+      // Update the UI
+      updateUser(updatedUserData);
+      
+      // Send updated name and bio to the server
+      const profileResponse = await fetch(`${apiUrl}/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -30,38 +50,88 @@ const Profile = () => {
         },
         body: JSON.stringify({ name, bio }),
       });
-      if (response.ok) {
-        updateUser({ name, bio });
-        navigate("/");
+  
+      if (!profileResponse.ok) {
+        // If the request fails, revert the update
+        updateUser(user);
+        throw new Error("Failed to update profile details");
       }
+  
+      const profileData = await profileResponse.json();
+      
+      // Handle file upload if there's a new file
+      if (file) {
+        try {
+          const formData = new FormData();
+          formData.append("profilePicture", file);
+  
+          const pictureResponse = await fetch(`${apiUrl}/profile/picture`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: formData,
+          });
+  
+          if (!pictureResponse.ok) {
+            throw new Error("Failed to upload profile picture");
+          }
+  
+          const pictureData = await pictureResponse.json();
+          
+          // Update the user data with the new profile picture
+          const finalUserData = {
+            ...updatedUserData,
+            profilePicture: pictureData.profilePicture
+          };
+          
+          updateUser(finalUserData);
+          showAlert("Profile updated successfully", "success");
+        } catch (error) {
+          // If picture upload fails, revert to previous image
+          setImagePreview(previousImagePreview || userLogo);
+          updateUser({
+            ...updatedUserData,
+            profilePicture: previousImagePreview
+          });
+          throw new Error("Failed to upload profile picture");
+        }
+      } else {
+        showAlert("Profile updated successfully", "success");
+      }
+      
+      // Clear the file state after successful upload
+      setFile(null);
+      
     } catch (error) {
       console.error("Error updating profile:", error);
-      showAlert("Failed to update profile", "error");
+      showAlert("An error occurred while updating profile", "error");
+    } finally {
+      setIsSubmitting(false);
+      setPreviousImagePreview(null);
     }
   };
 
-  const handleFileUpload = async () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("profilePicture", file);
-
-    try {
-      const response = await fetch(`${apiUrl}/profile/picture`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
+  const loadFile = (event) => {
+    const newFile = event.target.files[0];
+    if (newFile) {
+      // Store the current image URL before updating
+      setPreviousImagePreview(imagePreview);
+      
+      // Create and set the new image preview
+      const newImageUrl = URL.createObjectURL(newFile);
+      setImagePreview(newImageUrl);
+      
+      // Optimistically update the user context
+      updateUser({
+        ...user,
+        profilePicture: newImageUrl
       });
-      if (response.ok) {
-        const data = await response.json();
-        updateUser({ profilePicture: data.profilePicture });
-        showAlert("Profile picture updated successfully", "success");
-      }
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      showAlert("Failed to upload profile picture", "error");
+      
+      setFile(newFile);
+      
+      // Clean up the object URL when component unmounts or file changes
+      return () => URL.revokeObjectURL(newImageUrl);
     }
   };
 
@@ -79,23 +149,29 @@ const Profile = () => {
           {alert.message}
         </div>
       )}
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-        Profile
-      </h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Profile</h2>
+      
       <div className="mb-6">
-        <img
-          src={user.profilePicture || userLogo}
-          alt="Profile"
-          className="w-32 h-32 rounded-full mx-auto mb-4"
-        />
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="mb-2" />
-        <button
-          onClick={handleFileUpload}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Upload Picture
-        </button>
+        <div className="relative mx-auto w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden">
+          <img
+            src={imagePreview}
+            id="output"
+            alt="Profile"
+            className="w-full h-full object-cover"
+          />
+          <label htmlFor="file" className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+            <span className="text-white">Change Image</span>
+          </label>
+          <input
+            type="file"
+            id="file"
+            className="hidden"
+            onChange={loadFile}
+            accept="image/*"
+          />
+        </div>
       </div>
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
@@ -128,9 +204,10 @@ const Profile = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+          disabled={isSubmitting}
         >
-          Update Profile
+          {isSubmitting ? "Updating..." : "Update Profile"}
         </button>
       </form>
     </div>
