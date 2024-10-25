@@ -1,23 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiUrl } from "../config";
+import watchlistLight from "../imgs/watchlist-light.png";
+import watchlistDark from "../imgs/watchlist-dark.png";
+import PropTypes from 'prop-types';
 
-function Watchlist() {
+function Watchlist({ darkMode }) {
   const [watchlists, setWatchlists] = useState([]);
+  const [movieDetails, setMovieDetails] = useState({});
   const [newWatchlistName, setNewWatchlistName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalError, setModalError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const watchlistIcon = darkMode ? watchlistDark : watchlistLight;
 
   useEffect(() => {
     fetchWatchlists();
   }, []);
 
   useEffect(() => {
-    // Clear modal error when input changes
     if (modalError) setModalError("");
   }, [newWatchlistName]);
+
+  useEffect(() => {
+    const fetchMovieDetails = async () => {
+      const allMovieIds = [...new Set(watchlists.flatMap(w => w.movies))];
+      const newMovieDetails = { ...movieDetails };
+      
+      for (const movieId of allMovieIds) {
+        if (!newMovieDetails[movieId]) {
+          try {
+            const response = await fetch(`${apiUrl}/movies/movie/${movieId}`);
+            if (response.ok) {
+              const data = await response.json();
+              newMovieDetails[movieId] = data;
+            }
+          } catch (err) {
+            console.error(`Error fetching movie ${movieId}:`, err);
+          }
+        }
+      }
+      
+      setMovieDetails(newMovieDetails);
+    };
+
+    if (watchlists.length > 0) {
+      fetchMovieDetails();
+    }
+  }, [watchlists]);
 
   const fetchWatchlists = async () => {
     try {
@@ -47,7 +78,6 @@ function Watchlist() {
   const handleCreateWatchlist = async (e) => {
     e.preventDefault();
     
-    // Check for duplicate name
     const trimmedName = newWatchlistName.trim();
     const isDuplicate = watchlists.some(
       (watchlist) => watchlist.name.toLowerCase() === trimmedName.toLowerCase()
@@ -111,6 +141,64 @@ function Watchlist() {
     setModalError("");
   };
 
+  const renderMovieGrid = (watchlist) => {
+    if (watchlist.movies.length === 0) {
+      return (
+        <img
+          src={watchlistIcon}
+          alt="Empty watchlist"
+          className="w-full h-full object-cover"
+        />
+      );
+    }
+
+    if (watchlist.movies.length === 1) {
+      const movie = movieDetails[watchlist.movies[0]];
+      return movie ? (
+        <img
+          src={movie.Poster !== "N/A" ? movie.Poster : watchlistIcon}
+          alt={movie.Title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.src = watchlistIcon;
+          }}
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-200 dark:bg-slate-700 animate-pulse" />
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 gap-1 h-full">
+        {watchlist.movies.slice(0, 4).map((movieId) => {
+          const movie = movieDetails[movieId];
+          return (
+            <div key={movieId} className="w-full h-full">
+              {movie ? (
+                <img
+                  src={movie.Poster !== "N/A" ? movie.Poster : watchlistIcon}
+                  alt={movie.Title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = watchlistIcon;
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 dark:bg-slate-700 animate-pulse" />
+              )}
+            </div>
+          );
+        })}
+        {[...Array(Math.max(4 - watchlist.movies.length, 0))].map((_, index) => (
+          <div 
+            key={`empty-${index}`} 
+            className="w-full h-full bg-gray-200 dark:bg-slate-700"
+          />
+        ))}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
@@ -136,36 +224,41 @@ function Watchlist() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
           {watchlists.map((watchlist) => (
-  <div
-    key={watchlist._id}
-    className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-6 relative"
-  >
-    <Link to={`/watchlist/${watchlist._id}`} className="block">
-      <h3 className="text-xl font-semibold">{watchlist.name}</h3>
-      <p className="text-gray-600 dark:text-gray-400">
-        {watchlist.movies.length} movies
-      </p>
-    </Link>
-    <button
-      onClick={() => handleDeleteWatchlist(watchlist._id)}
-      className="absolute bottom-4 right-4 bg-gray-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 group"
-      aria-label="Delete watchlist"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-      >
-        <path d="M20.786,4.758c-.101-.024-1.614-.372-3.841-.64l-.852-2.457c-.059-.169-.203-.294-.38-.327-.071-.014-1.784-.334-3.713-.334s-3.642,.321-3.714,.334c-.176,.034-.32,.158-.379,.328l-.852,2.456c-2.226,.268-3.74,.616-3.842,.64-.27,.062-.437,.331-.374,.6,.054,.231,.26,.387,.487,.387,.037,0,.075-.004,.113-.013,.01-.002,.266-.061,.715-.148-.199,1.677-.385,4.286-.385,6.738,0,5.306,.865,9.19,.902,9.353,.04,.176,.172,.318,.346,.369,.131,.039,3.268,.956,6.981,.956s6.85-.917,6.981-.956c.174-.051,.307-.193,.347-.37,.036-.165,.901-4.091,.901-9.352,0-2.46-.185-5.067-.383-6.738,.448,.087,.703,.146,.713,.148,.271,.063,.537-.104,.601-.373,.062-.269-.104-.538-.374-.601ZM8.756,2.269c.553-.088,1.85-.269,3.244-.269s2.689,.18,3.245,.269l.6,1.731c-1.168-.111-2.475-.19-3.845-.19s-2.676,.078-3.845,.19l.6-1.731Zm10.474,10.054c0,4.343-.619,7.835-.817,8.841-.85,.221-3.48,.837-6.412,.837s-5.564-.616-6.413-.837c-.198-.999-.816-4.464-.816-8.841,0-2.551,.214-5.35,.416-6.923,1.591-.264,4.101-.589,6.813-.589s5.226,.325,6.815,.589c.208,1.613,.414,4.348,.414,6.923Z"/>
-        <path d="M9.558,9.118c-.276,0-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5s.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5Z"/>
-        <path d="M14.442,18.16c.276,0,.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5s-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5Z"/>
-      </svg>
-    </button>
-  </div>
-))}
+            <div
+              key={watchlist._id}
+              className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-6 relative"
+            >
+              <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                {renderMovieGrid(watchlist)}
+              </div>
+
+              <Link to={`/watchlist/${watchlist._id}`} className="block">
+                <h3 className="text-xl font-semibold">{watchlist.name}</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {watchlist.movies.length} movies
+                </p>
+              </Link>
+
+              <button
+                onClick={() => handleDeleteWatchlist(watchlist._id)}
+                className="absolute bottom-4 right-4 bg-gray-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 group"
+                aria-label="Delete watchlist"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path d="M20.786,4.758c-.101-.024-1.614-.372-3.841-.64l-.852-2.457c-.059-.169-.203-.294-.38-.327-.071-.014-1.784-.334-3.713-.334s-3.642,.321-3.714,.334c-.176,.034-.32,.158-.379,.328l-.852,2.456c-2.226,.268-3.74,.616-3.842,.64-.27,.062-.437,.331-.374,.6,.054,.231,.26,.387,.487,.387,.037,0,.075-.004,.113-.013,.01-.002,.266-.061,.715-.148-.199,1.677-.385,4.286-.385,6.738,0,5.306,.865,9.19,.902,9.353,.04,.176,.172,.318,.346,.369,.131,.039,3.268,.956,6.981,.956s6.85-.917,6.981-.956c.174-.051,.307-.193,.347-.37,.036-.165,.901-4.091,.901-9.352,0-2.46-.185-5.067-.383-6.738,.448,.087,.703,.146,.713,.148,.271,.063,.537-.104,.601-.373,.062-.269-.104-.538-.374-.601ZM8.756,2.269c.553-.088,1.85-.269,3.244-.269s2.689,.18,3.245,.269l.6,1.731c-1.168-.111-2.475-.19-3.845-.19s-2.676,.078-3.845,.19l.6-1.731Zm10.474,10.054c0,4.343-.619,7.835-.817,8.841-.85,.221-3.48,.837-6.412,.837s-5.564-.616-6.413-.837c-.198-.999-.816-4.464-.816-8.841,0-2.551,.214-5.35,.416-6.923,1.591-.264,4.101-.589,6.813-.589s5.226,.325,6.815,.589c.208,1.613,.414,4.348,.414,6.923Z"/>
+                  <path d="M9.558,9.118c-.276,0-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5s.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5Z"/>
+                  <path d="M14.442,18.16c.276,0,.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5s-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5Z"/>
+                </svg>
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -223,5 +316,10 @@ function Watchlist() {
     </div>
   );
 }
+
+// propTypes validation
+Watchlist.propTypes = {
+  darkMode: PropTypes.bool.isRequired, 
+};
 
 export default Watchlist;

@@ -256,7 +256,7 @@ function App() {
           <Route path="/signin" element={<SignIn darkMode={darkMode} />} />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
           <Route path="/favourites" element={<Favourites />} />
-          <Route path="/watchlist" element={<Watchlist />} />
+          <Route path="/watchlist" element={<Watchlist darkMode={darkMode} />} />
           <Route path="/watchlist/:id" element={<WatchlistDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
