@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 import "../index.css";
 
 // Loading spinning wheel
@@ -17,17 +18,34 @@ const LoadingOverlay = () => (
   </div>
 );
 
-// Search Handler
 const SearchBar = ({ onSearch, isLoading = false }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  const handleSubmit = useCallback((e) => {
+  // Initialize search term from URL params
+  useEffect(() => {
+    const queryParam = searchParams.get("q");
+    if (queryParam && !hasInitialized) {
+      setSearchTerm(queryParam);
+      // Only trigger search if we're on the home page
+      if (location.pathname === "/") {
+        onSearch(queryParam);
+        setHasInitialized(true);
+      }
+    }
+  }, [searchParams, location.pathname, onSearch, hasInitialized]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     const trimmedTerm = searchTerm.trim();
     if (trimmedTerm && !isLoading) {
+      // Update URL with search term
+      setSearchParams({ q: trimmedTerm });
       onSearch(trimmedTerm);
     }
-  }, [searchTerm, isLoading, onSearch]);
+  };
 
   return (
     <>
@@ -44,7 +62,7 @@ const SearchBar = ({ onSearch, isLoading = false }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               disabled={isLoading}
-              autoComplete="off"
+              autoComplete="on"
             />
           </div>
         </form>
