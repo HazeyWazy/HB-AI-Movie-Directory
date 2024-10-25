@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config";
 import { useUser } from '../context/UserContext';
-import userLogo from "../imgs/user.png"
+import userLogo from "../imgs/user.png";
 
 const Profile = () => {
   const { user, updateUser } = useUser();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [file, setFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(user?.profilePicture || userLogo);
   const [alert, setAlert] = useState({ show: false, message: "", type: "" });
   const navigate = useNavigate();
 
@@ -57,12 +58,18 @@ const Profile = () => {
       if (response.ok) {
         const data = await response.json();
         updateUser({ profilePicture: data.profilePicture });
+        setImagePreview(data.profilePicture);
         showAlert("Profile picture updated successfully", "success");
       }
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       showAlert("Failed to upload profile picture", "error");
     }
+  };
+
+  const loadFile = (event) => {
+    setImagePreview(URL.createObjectURL(event.target.files[0]));
+    setFile(event.target.files[0]);
   };
 
   const showAlert = (message, type) => {
@@ -79,23 +86,34 @@ const Profile = () => {
           {alert.message}
         </div>
       )}
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-        Profile
-      </h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Profile</h2>
+      
       <div className="mb-6">
-        <img
-          src={user.profilePicture || userLogo}
-          alt="Profile"
-          className="w-32 h-32 rounded-full mx-auto mb-4"
-        />
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="mb-2" />
+        <div className="relative mx-auto w-40 h-40 rounded-full border-4 border-gray-300 overflow-hidden">
+          <img
+            src={imagePreview}
+            id="output"
+            alt="Profile"
+            className="w-full h-full object-cover"
+          />
+          <label htmlFor="file" className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+            <span className="text-white">Change Image</span>
+          </label>
+          <input
+            type="file"
+            id="file"
+            className="hidden"
+            onChange={loadFile}
+          />
+        </div>
         <button
           onClick={handleFileUpload}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4"
         >
           Upload Picture
         </button>
       </div>
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
