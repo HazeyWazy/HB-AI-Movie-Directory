@@ -54,7 +54,7 @@ function Watchlist() {
     );
 
     if (isDuplicate) {
-      setModalError("A watchlist with this name already exists.");
+      setModalError("A watchlist with this name already exists");
       return;
     }
 
@@ -136,24 +136,36 @@ function Watchlist() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
           {watchlists.map((watchlist) => (
-            <div
-              key={watchlist._id}
-              className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-6"
-            >
-              <Link to={`/watchlist/${watchlist._id}`} className="block mb-2">
-                <h3 className="text-xl font-semibold">{watchlist.name}</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {watchlist.movies.length} movies
-                </p>
-              </Link>
-              <button
-                onClick={() => handleDeleteWatchlist(watchlist._id)}
-                className="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Delete Watchlist
-              </button>
-            </div>
-          ))}
+  <div
+    key={watchlist._id}
+    className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-6 relative"
+  >
+    <Link to={`/watchlist/${watchlist._id}`} className="block">
+      <h3 className="text-xl font-semibold">{watchlist.name}</h3>
+      <p className="text-gray-600 dark:text-gray-400">
+        {watchlist.movies.length} movies
+      </p>
+    </Link>
+    <button
+      onClick={() => handleDeleteWatchlist(watchlist._id)}
+      className="absolute bottom-4 right-4 bg-gray-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 group"
+      aria-label="Delete watchlist"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path d="M20.786,4.758c-.101-.024-1.614-.372-3.841-.64l-.852-2.457c-.059-.169-.203-.294-.38-.327-.071-.014-1.784-.334-3.713-.334s-3.642,.321-3.714,.334c-.176,.034-.32,.158-.379,.328l-.852,2.456c-2.226,.268-3.74,.616-3.842,.64-.27,.062-.437,.331-.374,.6,.054,.231,.26,.387,.487,.387,.037,0,.075-.004,.113-.013,.01-.002,.266-.061,.715-.148-.199,1.677-.385,4.286-.385,6.738,0,5.306,.865,9.19,.902,9.353,.04,.176,.172,.318,.346,.369,.131,.039,3.268,.956,6.981,.956s6.85-.917,6.981-.956c.174-.051,.307-.193,.347-.37,.036-.165,.901-4.091,.901-9.352,0-2.46-.185-5.067-.383-6.738,.448,.087,.703,.146,.713,.148,.271,.063,.537-.104,.601-.373,.062-.269-.104-.538-.374-.601ZM8.756,2.269c.553-.088,1.85-.269,3.244-.269s2.689,.18,3.245,.269l.6,1.731c-1.168-.111-2.475-.19-3.845-.19s-2.676,.078-3.845,.19l.6-1.731Zm10.474,10.054c0,4.343-.619,7.835-.817,8.841-.85,.221-3.48,.837-6.412,.837s-5.564-.616-6.413-.837c-.198-.999-.816-4.464-.816-8.841,0-2.551,.214-5.35,.416-6.923,1.591-.264,4.101-.589,6.813-.589s5.226,.325,6.815,.589c.208,1.613,.414,4.348,.414,6.923Z"/>
+        <path d="M9.558,9.118c-.276,0-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5s.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5Z"/>
+        <path d="M14.442,18.16c.276,0,.5-.224,.5-.5V9.618c0-.276-.224-.5-.5-.5s-.5,.224-.5,.5v8.042c0,.276,.224,.5,.5,.5Z"/>
+      </svg>
+    </button>
+  </div>
+))}
         </div>
       )}
 
@@ -172,7 +184,7 @@ function Watchlist() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                 New Watchlist
-              </h3>              
+              </h3>
             </div>
             <form onSubmit={handleCreateWatchlist}>
               <input
