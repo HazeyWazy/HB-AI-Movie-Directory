@@ -6,6 +6,7 @@ import watchlistDark from "../imgs/watchlist-dark.png";
 import PropTypes from 'prop-types';
 
 function Watchlist({ darkMode }) {
+  // State variables to store watchlists, movie details, form inputs, and UI states
   const [watchlists, setWatchlists] = useState([]);
   const [movieDetails, setMovieDetails] = useState({});
   const [newWatchlistName, setNewWatchlistName] = useState("");
@@ -13,21 +14,27 @@ function Watchlist({ darkMode }) {
   const [error, setError] = useState(null);
   const [modalError, setModalError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Conditionally set the watchlist icon based on dark mode
   const watchlistIcon = darkMode ? watchlistDark : watchlistLight;
 
+  // Fetch all watchlists on component mount
   useEffect(() => {
     fetchWatchlists();
   }, []);
 
+  // Clear modal error message when new watchlist name changes
   useEffect(() => {
     if (modalError) setModalError("");
   }, [newWatchlistName]);
 
+  // Fetch details for movies in each watchlist after watchlists are updated
   useEffect(() => {
     const fetchMovieDetails = async () => {
       const allMovieIds = [...new Set(watchlists.flatMap(w => w.movies))];
       const newMovieDetails = { ...movieDetails };
       
+      // Fetch details only for movies not already in state
       for (const movieId of allMovieIds) {
         if (!newMovieDetails[movieId]) {
           try {
@@ -45,11 +52,13 @@ function Watchlist({ darkMode }) {
       setMovieDetails(newMovieDetails);
     };
 
+    // Fetch movie details if watchlists are present
     if (watchlists.length > 0) {
       fetchMovieDetails();
     }
   }, [watchlists]);
 
+  // Function to fetch the user's watchlists
   const fetchWatchlists = async () => {
     try {
       const response = await fetch(`${apiUrl}/watchlists`, {
@@ -75,10 +84,12 @@ function Watchlist({ darkMode }) {
     }
   };
 
+  // Handle creating a new watchlist
   const handleCreateWatchlist = async (e) => {
-    e.preventDefault();
-    
+    e.preventDefault();  
     const trimmedName = newWatchlistName.trim();
+
+    // Check if the watchlist name is already used
     const isDuplicate = watchlists.some(
       (watchlist) => watchlist.name.toLowerCase() === trimmedName.toLowerCase()
     );
@@ -88,6 +99,7 @@ function Watchlist({ darkMode }) {
       return;
     }
 
+    // Make POST request to create new watchlist
     try {
       const response = await fetch(`${apiUrl}/watchlist`, {
         method: "POST",
@@ -101,7 +113,7 @@ function Watchlist({ darkMode }) {
       if (response.ok) {
         setNewWatchlistName("");
         setIsModalOpen(false);
-        fetchWatchlists();
+        fetchWatchlists();  // Refresh the list of watchlists
       } else {
         const errData = await response.json();
         throw new Error(errData.error || "Failed to create watchlist");
@@ -112,6 +124,7 @@ function Watchlist({ darkMode }) {
     }
   };
 
+  // Handle deleting an existing watchlist
   const handleDeleteWatchlist = async (watchlistId) => {
     try {
       const response = await fetch(`${apiUrl}/watchlist/${watchlistId}`, {
@@ -135,12 +148,14 @@ function Watchlist({ darkMode }) {
     }
   };
 
+  // Close modal and reset input fields
   const closeModal = () => {
     setIsModalOpen(false);
     setNewWatchlistName("");
     setModalError("");
   };
 
+  // Render movie grid for watchlist cover display
   const renderMovieGrid = (watchlist) => {
     if (watchlist.movies.length === 0) {
       return (
@@ -168,7 +183,7 @@ function Watchlist({ darkMode }) {
       );
     }
 
-    // Create a movies array of length 4 by repeating items as needed
+    // Create a movies array of length 4 by repeating items
     let moviesToShow = [...Array(4)].map(
       (_, i) => watchlist.movies[i % watchlist.movies.length]
     );
@@ -203,6 +218,7 @@ function Watchlist({ darkMode }) {
     );
   };
 
+  // Loader
   if (loading) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
@@ -215,6 +231,7 @@ function Watchlist({ darkMode }) {
     );
   }
 
+  // Show error if fetching failed
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -232,11 +249,10 @@ function Watchlist({ darkMode }) {
               key={watchlist._id}
               className="w-64 h-92bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-950 hover:shadow-xl transition-shadow duration-300 p-4 relative"
             >
-              <div className="aspect-square mb-4 rounded-lg overflow-hidden">
-                {renderMovieGrid(watchlist)}
-              </div>
-
               <Link to={`/watchlist/${watchlist._id}`} className="block">
+                <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                  {renderMovieGrid(watchlist)}
+                </div>              
                 <h3 className="text-xl font-semibold">{watchlist.name}</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   {watchlist.movies.length} movies
