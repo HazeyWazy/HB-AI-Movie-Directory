@@ -3,6 +3,19 @@ const User = require('../models/User');
 
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
+  
+  // Validate required fields
+  if (!name || !email || !password) {
+    return res.status(400).json({ 
+      error: "Missing required fields", 
+      details: {
+        name: !name ? "Name is required" : null,
+        email: !email ? "Email is required" : null,
+        password: !password ? "Password is required" : null
+      }
+    });
+  }
+
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: "Email already registered" });
