@@ -16,6 +16,7 @@ const MovieDetail = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [trailerUrl, setTrailerUrl] = useState(null);
   const { id } = useParams();
 
   useEffect(() => {
@@ -35,8 +36,16 @@ const MovieDetail = ({
         }
         const data = await response.json();
         setMovie(data);
-
+        const trailerResponse = await fetch(`${apiUrl}/movie/${id}/trailer`);
+        console.log("tomma :", trailerResponse);
+        if(trailerResponse.ok){
+          const trailerData = await trailerResponse.json();
+          setTrailerUrl(trailerData.trailerUrl);
+        }else{
+          setTrailerUrl(null);
+        }
         // Only fetch user-specific data if logged in
+
         if (isLoggedIn) {
           // Fetch user's watchlists
           const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
@@ -51,7 +60,7 @@ const MovieDetail = ({
             const watchlistsData = await watchlistsResponse.json();
             setWatchlists(watchlistsData.watchlists || []);
           }
-
+          
           // Check if the movie is in favorites
           const favouritesResponse = await fetch(`${apiUrl}/favourites`, {
             method: "GET",
@@ -60,6 +69,7 @@ const MovieDetail = ({
               "Content-Type": "application/json",
             },
           });
+         
 
           if (favouritesResponse.ok) {
             const favouritesData = await favouritesResponse.json();
@@ -81,7 +91,7 @@ const MovieDetail = ({
         setLoading(false);
       }
     };
-
+    
     fetchMovieDetail();
   }, [id, isLoggedIn]);
 
@@ -120,7 +130,6 @@ const MovieDetail = ({
       setError("Failed to add movie to watchlist. Please try again.");
     }
   };
-
   if (loading) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
@@ -299,6 +308,23 @@ const MovieDetail = ({
           )}
         </div>
       </div>
+      {trailerUrl ? (
+  <div className="my-6 w-full flex justify-center">
+    <div className="w-full max-w-6xl">
+      <h2 className="text-xl font-semibold mb-4 text-center">Watch Trailer:</h2>
+      <iframe
+        className="w-full aspect-video"
+        src={trailerUrl} // Updated YouTube embed link
+        title="Movie Trailer"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  </div>
+) : (
+      <p className="text-slate-600 dark:text-slate-400 text-center mt-6">Trailer not available.</p>
+    )}
     </div>
   );
 };

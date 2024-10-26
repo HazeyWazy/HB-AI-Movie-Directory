@@ -1,10 +1,10 @@
 const { fetchMovieTrailerById } = require("../services/movieService");
 
 exports.fetchTrailer = async (req, res) => {
-  const { moveId } = req.params;
-  console.log("constroller: ", moveId);
+  const { id } = req.params;
+  console.log("constroller: ", id);
   try {
-    const trailer = await fetchMovieTrailerById(moveId);
+    const trailer = await fetchMovieTrailerById(id);
     if (trailer.error) {
       return res.status(404).json({ error: `trailer error: ${trailer.error}` });
     }

@@ -141,20 +141,52 @@ exports.fetchMovieByQuery = async (params = {}) => {
   }
 };
 
-exports.fetchMovieTrailerById = async (id) => {
-  console.log("serice: ", id);
+exports.fetchMovieTrailerById = async (id, movieTitle, releaseYear) => {
+  console.log("service: ", id);
   try {
     const data = await makeApiRequest(`/movie/${id}/videos`, {
       language: "en-US",
     });
 
-    const trailer = data.results.find(
+    const trailers = data.results || [];
+
+    console.log("Trailers array:", trailers);
+
+    if (!Array.isArray(trailers)) {
+      throw new Error("No trailers found or incorrect structure");
+    }
+
+    // First priority: Trailer matching the movie title and containing "Official Trailer"
+    const filteredTrailer = trailers.find(
+      (video) =>
+        video.type === "Trailer" &&
+        video.site === "YouTube" &&
+        video.name && // Ensure video.name is defined
+        movieTitle && // Ensure movieTitle is defined
+        (video.name.toLowerCase().includes(movieTitle.toLowerCase()) ||
+          video.name.toLowerCase().includes("official trailer"))
+    );
+
+    // Fallback: Any trailer from the release year
+    const fallbackTrailer = trailers.find(
+      (video) =>
+        video.type === "Trailer" &&
+        video.site === "YouTube" &&
+        video.published_at &&
+        new Date(video.published_at).getFullYear() === releaseYear
+    );
+
+    // Last fallback: Any YouTube trailer if neither of the above works
+    const defaultTrailer = trailers.find(
       (video) => video.type === "Trailer" && video.site === "YouTube"
     );
 
-    if (trailer) {
+    const selectedTrailer =
+      filteredTrailer || fallbackTrailer || defaultTrailer;
+
+    if (selectedTrailer) {
       return {
-        trailerUrl: `https://www.youtube.com/watch?v=${trailer.key}`,
+        trailerUrl: `https://www.youtube.com/embed/${selectedTrailer.key}`,
       };
     } else {
       return { error: "Trailer not found" };
