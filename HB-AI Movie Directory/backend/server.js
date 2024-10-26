@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require('path');
+const path = require("path");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -23,21 +23,22 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const movieRoutes = require("./routes/movieRoutes");
 const favouritesRoutes = require("./routes/favouritesRoutes");
-const profileRoutes = require('./routes/profileRoutes');
-const watchlistRoutes = require('./routes/watchlistRoutes'); // Add this line
+const profileRoutes = require("./routes/profileRoutes");
+const watchlistRoutes = require("./routes/watchlistRoutes"); // Add this line
+const trailerRoutes = require("./routes/trailerRoutes"); // Add this line
 
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api", favouritesRoutes);
-app.use('/api', profileRoutes);
-app.use('/api', watchlistRoutes); // Add this line
+app.use("/api", profileRoutes);
+app.use("/api", watchlistRoutes); // Add this line
+app.use("/api", trailerRoutes); // Add this line
 
 // MongoDB connection
 mongoose
