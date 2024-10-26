@@ -31,14 +31,14 @@ const movieRoutes = require("./routes/movieRoutes");
 const favouritesRoutes = require("./routes/favouritesRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const watchlistRoutes = require("./routes/watchlistRoutes"); // Add this line
-const trailerRoutes = require("./routes/trailerRoutes"); // Add this line
+const trailerRoutes = require("./routes/trailerRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api", favouritesRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", watchlistRoutes); // Add this line
-app.use("/api", trailerRoutes); // Add this line
+app.use("/api", trailerRoutes);
 
 // MongoDB connection
 mongoose
