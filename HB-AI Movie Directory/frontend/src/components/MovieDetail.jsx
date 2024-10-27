@@ -16,7 +16,6 @@ const MovieDetail = ({
   const [selectedWatchlist, setSelectedWatchlist] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [trailerUrl, setTrailerUrl] = useState(null);
   const { id } = useParams();
   const [showWatchlistModal, setShowWatchlistModal] = useState(false);
