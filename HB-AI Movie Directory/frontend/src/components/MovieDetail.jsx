@@ -142,9 +142,17 @@ const MovieDetail = ({
   
       if (response.ok) {
         const newWatchlist = await response.json();
-        setWatchlists([...watchlists, newWatchlist]);
-        setNewWatchlistName("");
+
+        // Update the watchlists array with the new watchlist
+        setWatchlists(prevWatchlists => [...prevWatchlists, newWatchlist.watchlist]);
+        
+        // Add the new watchlist to selected watchlists
+        setSelectedWatchlists(new Set([...selectedWatchlists, newWatchlist.watchlist._id]));
+        
+        // Close the new watchlist modal
         setShowNewWatchlistModal(false);
+        setNewWatchlistName("");
+        setModalError("");
       } else {
         const errData = await response.json();
         throw new Error(errData.error || "Failed to create watchlist");
@@ -308,7 +316,7 @@ const MovieDetail = ({
                 {/* Watchlist Button */}
                 <button
                   onClick={() => setShowWatchlistModal(true)}
-                  className="bg-white text-black flex items-center gap-2 p-3 pl-4 rounded-lg shadow-lg w-52 hover:bg-gray-50 transition-colors duration-200"
+                  className="bg-white text-black flex items-center gap-2 p-3 pl-4 rounded-lg shadow-lg w-52 transition-colors duration-200"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -342,8 +350,8 @@ const MovieDetail = ({
             </h3>
             <div className="max-h-64 overflow-y-auto">
               {watchlists.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 mt-2">
-                  No watchlists yet
+                <p className="text-gray-500 dark:text-gray-400 mt-2 mb-4">
+                  You have no watchlist yet.
                 </p>
               ) : (
                 watchlists.map((watchlist) => (
@@ -384,7 +392,7 @@ const MovieDetail = ({
               onClick={() => {
                 setShowNewWatchlistModal(true);
               }}
-              className="w-full h-10 mt-4 flex items-center gap-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg"
+              className="w-full h-10 p-2 flex items-center gap-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
