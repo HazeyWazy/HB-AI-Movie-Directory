@@ -342,7 +342,7 @@ const MovieDetail = ({
             </h3>
             <div className="max-h-64 overflow-y-auto">
               {watchlists.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                <p className="text-gray-500 dark:text-gray-400 mt-2">
                   No watchlists yet
                 </p>
               ) : (
@@ -388,21 +388,22 @@ const MovieDetail = ({
               onClick={() => {
                 setShowNewWatchlistModal(true);
               }}
-              className="w-full mt-4 p-2 flex items-center gap-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg"
+              className="w-full h-10 mt-4 flex items-center gap-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
+                width="14"
+                height="14"
+                viewBox="0 0 512 512"
+                fill="currentColor"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+                <g>
+                  <path d="M490.667,234.667H277.333V21.333C277.333,9.551,267.782,0,256,0c-11.782,0-21.333,9.551-21.333,21.333v213.333H21.333   C9.551,234.667,0,244.218,0,256c0,11.782,9.551,21.333,21.333,21.333h213.333v213.333c0,11.782,9.551,21.333,21.333,21.333   c11.782,0,21.333-9.551,21.333-21.333V277.333h213.333c11.782,0,21.333-9.551,21.333-21.333   C512,244.218,502.449,234.667,490.667,234.667z"/>
+                </g>
               </svg>
               New Watchlist
             </button>
