@@ -1,11 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act } from 'react';
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
 import * as UserContextModule from './context/UserContext';
 
-// Mock UserContext
 const mockUserContext = {
   user: null,
   isLoggedIn: false,
@@ -14,91 +14,117 @@ const mockUserContext = {
   fetchUserInfo: vi.fn(),
 };
 
-// Mock useUser hook
 vi.mock('./context/UserContext', () => ({
   useUser: () => mockUserContext,
   UserProvider: ({ children }) => children,
 }));
 
-// Mock fetch globally
 global.fetch = vi.fn(() =>
   Promise.resolve({
+    ok: true,
     json: () => Promise.resolve({ results: [] }),
   })
 );
 
-// Utility function to render App with Router
-const renderApp = () => {
-  return render(
-    <UserContextModule.UserProvider>
-      <Router>
-        <App />
-      </Router>
-    </UserContextModule.UserProvider>
-  );
+const mockStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  clear: vi.fn(),
+  removeItem: vi.fn(),
+};
+Object.defineProperty(window, 'localStorage', { value: mockStorage });
+Object.defineProperty(window, 'sessionStorage', { value: mockStorage });
+Object.defineProperty(window, 'performance', {
+  value: { navigation: { type: 0 } },
+  writable: true
+});
+
+const renderApp = async () => {
+  let rendered;
+  await act(async () => {
+    rendered = render(
+      <UserContextModule.UserProvider>
+        <Router>
+          <App />
+        </Router>
+      </UserContextModule.UserProvider>
+    );
+  });
+  return rendered;
 };
 
 describe("App Component", () => {
   beforeEach(() => {
-    localStorage.clear();
-    fetch.mockClear();
     vi.clearAllMocks();
+    mockStorage.clear.mockClear();
+    mockStorage.getItem.mockClear();
+    mockStorage.setItem.mockClear();
+    fetch.mockClear();
+    document.documentElement.classList.remove('dark');
   });
 
-  it("renders welcome message", () => {
-    renderApp();
-    expect(screen.getByText(/Welcome, Guest!/i)).toBeDefined();
+  it("renders welcome message", async () => {
+    await renderApp();
+    expect(screen.getByText(/Welcome, Guest!/i)).toBeInTheDocument();
   });
 
-  it("renders navigation links", () => {
-    renderApp();
-    expect(screen.getByText(/HOME/i)).toBeDefined();
-    expect(screen.getByText(/SIGN IN/i)).toBeDefined();
-    expect(screen.getByText(/SIGN UP/i)).toBeDefined();
+  it("renders navigation links", async () => {
+    await renderApp();
+    expect(screen.getByText(/HOME/i)).toBeInTheDocument();
+    expect(screen.getByText(/SIGN IN/i)).toBeInTheDocument();
+    expect(screen.getByText(/SIGN UP/i)).toBeInTheDocument();
   });
 
   it("toggles dark mode", async () => {
-    renderApp();
-    const darkModeButton = screen.getAllByRole("button").pop(); // Get the last button (dark mode toggle)
+    await renderApp();
+    const darkModeButton = screen.getAllByRole("button").pop();
 
-    fireEvent.click(darkModeButton);
+    await act(async () => {
+      fireEvent.click(darkModeButton);
+    });
     expect(document.documentElement.classList.contains("dark")).toBe(true);
 
-    fireEvent.click(darkModeButton);
+    await act(async () => {
+      fireEvent.click(darkModeButton);
+    });
     expect(document.documentElement.classList.contains("dark")).toBe(false);
   });
 
   it("searches for movies", async () => {
-    renderApp();
-    const searchInput = screen.getByPlaceholderText(
-      /What are we watching today?/i
-    );
+    await renderApp();
+    const searchInput = screen.getByPlaceholderText(/What are we watching today?/i);
     const searchForm = searchInput.closest("form");
 
-    fireEvent.change(searchInput, { target: { value: "Inception" } });
-    fireEvent.submit(searchForm);
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: "Inception" } });
+    });
 
-    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("Inception"));
+    await act(async () => {
+      fireEvent.submit(searchForm);
+    });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(expect.stringContaining("Inception"));
+    });
   });
 
-  it("shows login and signup links when not logged in", () => {
-    renderApp();
-    expect(screen.getByText(/SIGN IN/i)).toBeDefined();
-    expect(screen.getByText(/SIGN UP/i)).toBeDefined();
-    expect(screen.queryByText(/LOGOUT/i)).toBeNull();
+  it("shows login and signup links when not logged in", async () => {
+    await renderApp();
+    expect(screen.getByText(/SIGN IN/i)).toBeInTheDocument();
+    expect(screen.getByText(/SIGN UP/i)).toBeInTheDocument();
+    expect(screen.queryByText(/LOGOUT/i)).not.toBeInTheDocument();
   });
 
-  it("shows logout when logged in", () => {
+  it("shows logout when logged in", async () => {
     vi.spyOn(UserContextModule, 'useUser').mockReturnValue({
       ...mockUserContext,
       user: { name: "Test User" },
       isLoggedIn: true,
     });
 
-    renderApp();
-
-    expect(screen.getByText(/LOGOUT/i)).toBeDefined();
-    expect(screen.queryByText(/SIGN IN/i)).toBeNull();
-    expect(screen.queryByText(/SIGN UP/i)).toBeNull();
+    await renderApp();
+    expect(screen.getByText(/LOGOUT/i)).toBeInTheDocument();
+    expect(screen.queryByText(/SIGN IN/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/SIGN UP/i)).not.toBeInTheDocument();
   });
 });
