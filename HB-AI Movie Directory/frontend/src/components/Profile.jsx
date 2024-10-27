@@ -140,7 +140,17 @@ const Profile = () => {
     setTimeout(() => setAlert({ show: false, message: "", type: "" }), 3000);
   };
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) {
+    return (
+      <div className="flex flex-col min-h-[85vh] text-center justify-center">
+        <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-orange-300 border-t-gray-300"></div>
+        <p className="mt-4 text-lg text-slate-900 dark:text-white">Loading...</p>
+        <p className="mt-1 text-slate-600 dark:text-slate-400">
+          Hang tight, your profile is on the way
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">

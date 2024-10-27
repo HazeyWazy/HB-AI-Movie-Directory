@@ -118,6 +118,7 @@ const SignIn = ({ darkMode }) => {
   );
 };
 
+// propTypes validation
 SignIn.propTypes = {
   darkMode: PropTypes.bool.isRequired,
 };

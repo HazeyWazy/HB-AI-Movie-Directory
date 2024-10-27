@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import movies from '../imgs/movies.jpeg';
 import {apiUrl} from "../config";
 
-
 const SignUp = ({ darkMode }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -131,6 +130,7 @@ const SignUp = ({ darkMode }) => {
   );
 };
 
+// propTypes validation
 SignUp.propTypes = {
   darkMode: PropTypes.bool.isRequired, 
 };
