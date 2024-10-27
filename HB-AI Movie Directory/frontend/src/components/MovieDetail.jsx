@@ -353,7 +353,7 @@ const MovieDetail = ({
                     onClick={() => toggleWatchlist(watchlist._id)}
                   >
                     <div
-                      className={`w-6 h-6 border-2 rounded mr-3 flex items-center justify-center transition-colors ${
+                      className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center transition-colors ${
                         selectedWatchlists.has(watchlist._id)
                           ? "border-blue-500 bg-blue-500"
                           : "border-gray-300"
@@ -361,17 +361,13 @@ const MovieDetail = ({
                     >
                       {selectedWatchlists.has(watchlist._id) && (
                         <svg
-                          className="w-4 h-4 text-white"
-                          fill="none"
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
                           stroke="currentColor"
+                          strokeWidth={0.5}
                           viewBox="0 0 24 24"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
+                          <path d="M22.319,4.431,8.5,18.249a1,1,0,0,1-1.417,0L1.739,12.9a1,1,0,0,0-1.417,0h0a1,1,0,0,0,0,1.417l5.346,5.345a3.008,3.008,0,0,0,4.25,0L23.736,5.847a1,1,0,0,0,0-1.416h0A1,1,0,0,0,22.319,4.431Z"/>
                         </svg>
                       )}
                     </div>
@@ -394,7 +390,7 @@ const MovieDetail = ({
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
                 height="14"
-                viewBox="0 0 512 512"
+                viewBox="0 0 524 512"
                 fill="currentColor"
                 stroke="currentColor"
                 strokeWidth="2"
