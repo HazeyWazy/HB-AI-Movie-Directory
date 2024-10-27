@@ -63,7 +63,7 @@ describe('WatchlistDetail Component', () => {
     await renderWatchlistDetail();
     
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    expect(screen.getByText('Fetching your watchlist')).toBeInTheDocument();
+    expect(screen.getByText('Fetching your watchlist details')).toBeInTheDocument();
   });
 
   it('renders watchlist details correctly', async () => {
@@ -157,11 +157,11 @@ describe('WatchlistDetail Component', () => {
     await renderWatchlistDetail();
 
     await waitFor(() => {
-      expect(screen.getAllByText('Remove from Watchlist')).toHaveLength(2);
+      expect(screen.getAllByLabelText('Remove movie from watchlist')).toHaveLength(2);
     });
 
     await act(async () => {
-      fireEvent.click(screen.getAllByText('Remove from Watchlist')[0]);
+      fireEvent.click(screen.getAllByLabelText('Remove movie from watchlist')[0]);
     });
 
     expect(fetch).toHaveBeenCalledWith(
@@ -196,11 +196,11 @@ describe('WatchlistDetail Component', () => {
     await renderWatchlistDetail();
 
     await waitFor(() => {
-      expect(screen.getAllByText('Remove from Watchlist')).toHaveLength(2);
+      expect(screen.getAllByLabelText('Remove movie from watchlist')).toHaveLength(2);
     });
 
     await act(async () => {
-      fireEvent.click(screen.getAllByText('Remove from Watchlist')[0]);
+      fireEvent.click(screen.getAllByLabelText('Remove movie from watchlist')[0]);
     });
 
     await waitFor(() => {
@@ -263,7 +263,7 @@ describe('WatchlistDetail Component', () => {
     await renderWatchlistDetail();
 
     await act(async () => {
-      fireEvent.click(screen.getAllByText('Remove from Watchlist')[0]);
+      fireEvent.click(screen.getAllByLabelText('Remove movie from watchlist')[0]);
     });
 
     await waitFor(() => {
