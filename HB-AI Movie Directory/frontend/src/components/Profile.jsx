@@ -205,7 +205,7 @@ const Profile = () => {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
         <div className="mb-6">
@@ -219,7 +219,7 @@ const Profile = () => {
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline h-32"
           ></textarea>
         </div>
         <button
