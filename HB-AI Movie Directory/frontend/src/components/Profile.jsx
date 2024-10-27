@@ -12,6 +12,7 @@ const Profile = () => {
   const [previousImagePreview, setPreviousImagePreview] = useState(null);
   const [alert, setAlert] = useState({ show: false, message: "", type: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdUrl, setCreatedUrl] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -112,14 +113,26 @@ const Profile = () => {
     }
   };
 
+  useEffect(() => {
+    // Cleanup effect
+    return () => {
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
+      }
+    };
+  }, [createdUrl]);
+
   const loadFile = (event) => {
     const newFile = event.target.files[0];
     if (newFile) {
-      // Store the current image URL before updating
-      setPreviousImagePreview(imagePreview);
+      // Cleanup previous URL if exists
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
+      }
       
       // Create and set the new image preview
       const newImageUrl = URL.createObjectURL(newFile);
+      setCreatedUrl(newImageUrl);
       setImagePreview(newImageUrl);
       
       // Optimistically update the user context
@@ -129,9 +142,6 @@ const Profile = () => {
       });
       
       setFile(newFile);
-      
-      // Clean up the object URL when component unmounts or file changes
-      return () => URL.revokeObjectURL(newImageUrl);
     }
   };
 

@@ -24,15 +24,6 @@ import "./index.css";
 import { apiUrl } from "./config";
 
 function App() {
-  // Also update the movies state initialization
-  const [movies, setMovies] = useState(() => {
-    // Only initialize from sessionStorage if this is not a page refresh
-    if (performance.navigation.type !== 1) {
-      const savedMovies = sessionStorage.getItem("searchResults");
-      return savedMovies ? JSON.parse(savedMovies) : [];
-    }
-    return [];
-  });
   const [darkMode, setDarkMode] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const { user, isLoggedIn, logout } = useUser();
@@ -56,16 +47,47 @@ function App() {
     }
   }, [darkMode]);
 
+  // Helper function to check if it's a page refresh
+  const isPageRefresh = () => {
+    try {
+      return performance?.navigation?.type === 1;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Update the movies state initialization
+  const [movies, setMovies] = useState(() => {
+    try {
+      // Only initialize from sessionStorage if this is not a page refresh
+      if (!isPageRefresh()) {
+        const savedMovies = sessionStorage.getItem("searchResults");
+        return savedMovies ? JSON.parse(savedMovies) : [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   // Add this effect to handle page refresh
   useEffect(() => {
     const handleBeforeUnload = () => {
-      sessionStorage.clear();
+      try {
+        sessionStorage.clear();
+      } catch (e) {
+        console.error('Error clearing session storage:', e);
+      }
     };
 
     // Clear everything on page load if it's a refresh
-    if (performance.navigation.type === 1) {
-      sessionStorage.clear();
-      setMovies([]);
+    if (isPageRefresh()) {
+      try {
+        sessionStorage.clear();
+        setMovies([]);
+      } catch (e) {
+        console.error('Error handling page refresh:', e);
+      }
     }
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -345,7 +367,10 @@ function App() {
           <Route path="/signin" element={<SignIn darkMode={darkMode} />} />
           <Route path="/signup" element={<SignUp darkMode={darkMode} />} />
           <Route path="/favourites" element={<Favourites />} />
-          <Route path="/watchlist" element={<Watchlist darkMode={darkMode} />} />
+          <Route
+            path="/watchlist"
+            element={<Watchlist darkMode={darkMode} />}
+          />
           <Route path="/watchlist/:id" element={<WatchlistDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
