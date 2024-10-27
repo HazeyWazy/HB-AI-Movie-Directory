@@ -13,7 +13,6 @@ const MovieDetail = ({
   const [movie, setMovie] = useState(null);
   const [isFavourite, setIsFavourite] = useState(false);
   const [watchlists, setWatchlists] = useState([]);
-  const [selectedWatchlist, setSelectedWatchlist] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [trailerUrl, setTrailerUrl] = useState(null);
@@ -24,28 +23,34 @@ const MovieDetail = ({
   const [newWatchlistName, setNewWatchlistName] = useState("");
   const [modalError, setModalError] = useState("");
   const { isLoggedIn } = useUser();
+  const [watchlistMovies, setWatchlistMovies] = useState({});
+  const [updateError, setUpdateError] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
         setLoading(true);
+
         // Fetch movie details
         const response = await fetch(`${apiUrl}/movies/movie/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch movie details");
         }
+
         const data = await response.json();
-        setMovie(data);
+        setMovie(data);        
         const trailerResponse = await fetch(`${apiUrl}/movie/${id}/trailer`);
         console.log("tomma :", trailerResponse);
-        if(trailerResponse.ok){
+
+        if (trailerResponse.ok) {
           const trailerData = await trailerResponse.json();
           setTrailerUrl(trailerData.trailerUrl);
-        }else{
+        } else {
           setTrailerUrl(null);
         }
-        // Only fetch user-specific data if logged in
 
+        // Only fetch user-specific data if logged in
         if (isLoggedIn) {
           // Fetch user's watchlists
           const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
@@ -59,6 +64,21 @@ const MovieDetail = ({
           if (watchlistsResponse.ok) {
             const watchlistsData = await watchlistsResponse.json();
             setWatchlists(watchlistsData.watchlists || []);
+            
+            // Create a Set of already selected watchlists based on movie presence
+            const selectedWatchlistsSet = new Set(
+              watchlistsData.watchlists
+                .filter(watchlist => watchlist.movies.includes(id))
+                .map(watchlist => watchlist._id)
+            );
+            setSelectedWatchlists(selectedWatchlistsSet);
+
+            // Create a mapping of watchlist IDs to their movies
+            const moviesMap = {};
+            watchlistsData.watchlists.forEach(watchlist => {
+              moviesMap[watchlist._id] = new Set(watchlist.movies);
+            });
+            setWatchlistMovies(moviesMap);
           }
           
           // Check if the movie is in favorites
@@ -68,8 +88,7 @@ const MovieDetail = ({
               Authorization: `Bearer ${localStorage.getItem("token")}`,
               "Content-Type": "application/json",
             },
-          });
-         
+          });         
 
           if (favouritesResponse.ok) {
             const favouritesData = await favouritesResponse.json();
@@ -91,6 +110,63 @@ const MovieDetail = ({
     fetchMovieDetail();
   }, [id, isLoggedIn]);
 
+  const handleDone = async () => {
+    try {
+      // Get the current watchlists that contain this movie
+      const currentWatchlists = new Set(
+        Object.entries(watchlistMovies)
+          .filter(([_, movies]) => movies.has(id))
+          .map(([watchlistId]) => watchlistId)
+      );
+
+      // Determine which watchlists to add to and remove from
+      const toAdd = [...selectedWatchlists].filter(watchlistId => !currentWatchlists.has(watchlistId));
+      const toRemove = [...currentWatchlists].filter(watchlistId => !selectedWatchlists.has(watchlistId));
+
+      // Add movie to newly selected watchlists
+      for (const watchlistId of toAdd) {
+        await onAddToWatchlist(watchlistId, movie.imdbID);
+      }
+
+      // Remove movie from unselected watchlists
+      for (const watchlistId of toRemove) {
+        try {
+          const response = await fetch(`${apiUrl}/watchlist/remove`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ watchlistId, movieId: movie.imdbID }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to remove movie from watchlist");
+          }
+        } catch (err) {
+          console.error("Error removing movie from watchlist:", err);
+        }
+      }
+
+      // Update local state to reflect changes
+      const updatedMoviesMap = { ...watchlistMovies };
+      toAdd.forEach(watchlistId => {
+        updatedMoviesMap[watchlistId] = new Set([...(updatedMoviesMap[watchlistId] || []), id]);
+      });
+      toRemove.forEach(watchlistId => {
+        const movies = new Set(updatedMoviesMap[watchlistId]);
+        movies.delete(id);
+        updatedMoviesMap[watchlistId] = movies;
+      });
+      setWatchlistMovies(updatedMoviesMap);
+
+      setShowWatchlistModal(false);
+    } catch (error) {
+      console.error("Error updating watchlists:", error);
+      setError("Failed to update watchlists");
+    }
+  };
+
   const handleFavouriteChange = async () => {
     try {
       if (!movie || !movie.imdbID) {
@@ -108,22 +184,6 @@ const MovieDetail = ({
       setError(
         error.message || "Failed to update favourite status. Please try again."
       );
-    }
-  };
-
-  const handleAddToWatchlist = async () => {
-    if (!selectedWatchlist) {
-      setError("Please select a watchlist first");
-      return;
-    }
-
-    try {
-      await onAddToWatchlist(selectedWatchlist, movie.imdbID);
-      setError(null);
-      alert("Movie added to watchlist successfully");
-    } catch (error) {
-      console.error("Error adding movie to watchlist:", error);
-      setError("Failed to add movie to watchlist. Please try again.");
     }
   };
 
@@ -169,19 +229,6 @@ const MovieDetail = ({
       }
     } catch (err) {
       setModalError(err.message);
-    }
-  };
-  
-  const handleDone = async () => {
-    try {
-      for (const watchlistId of selectedWatchlists) {
-        await onAddToWatchlist(watchlistId, movie.imdbID);
-      }
-      setShowWatchlistModal(false);
-      setSelectedWatchlists(new Set());
-    } catch (error) {
-      console.error("Error adding to watchlists:", error);
-      setError("Failed to add movie to watchlists");
     }
   };
   
