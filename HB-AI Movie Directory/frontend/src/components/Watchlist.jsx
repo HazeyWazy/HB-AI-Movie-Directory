@@ -95,7 +95,7 @@ function Watchlist({ darkMode }) {
     );
 
     if (isDuplicate) {
-      setModalError("A watchlist with this name already exists");
+      setModalError("A watchlist with this name already exists.");
       return;
     }
 

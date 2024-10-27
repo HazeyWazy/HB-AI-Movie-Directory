@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useUser } from "../context/UserContext";
 import "../index.css";
 import { apiUrl } from "../config";
 
@@ -16,6 +17,12 @@ const MovieDetail = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const [showWatchlistModal, setShowWatchlistModal] = useState(false);
+  const [showNewWatchlistModal, setShowNewWatchlistModal] = useState(false);
+  const [selectedWatchlists, setSelectedWatchlists] = useState(new Set());
+  const [newWatchlistName, setNewWatchlistName] = useState("");
+  const [modalError, setModalError] = useState("");
+  const { isLoggedIn } = useUser();
 
   useEffect(() => {
     const fetchMovieDetail = async () => {
@@ -29,40 +36,39 @@ const MovieDetail = ({
         const data = await response.json();
         setMovie(data);
 
-        // Fetch user's watchlists
-        const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
+        // Only fetch user-specific data if logged in
+        if (isLoggedIn) {
+          // Fetch user's watchlists
+          const watchlistsResponse = await fetch(`${apiUrl}/watchlists`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+          });
 
-        if (watchlistsResponse.ok) {
-          const watchlistsData = await watchlistsResponse.json();
-          setWatchlists(watchlistsData.watchlists || []);
-        }
-
-        // Check if the movie is in favorites
-        const favouritesResponse = await fetch(`${apiUrl}/favourites`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (favouritesResponse.ok) {
-          const favouritesData = await favouritesResponse.json();
-          if (favouritesData && favouritesData.favorites) {
-            setIsFavourite(
-              favouritesData.favorites.some((fav) => fav.imdbID === id)
-            );
-          } else {
-            setIsFavourite(false);
+          if (watchlistsResponse.ok) {
+            const watchlistsData = await watchlistsResponse.json();
+            setWatchlists(watchlistsData.watchlists || []);
           }
-        } else {
-          setIsFavourite(false);
+
+          // Check if the movie is in favorites
+          const favouritesResponse = await fetch(`${apiUrl}/favourites`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (favouritesResponse.ok) {
+            const favouritesData = await favouritesResponse.json();
+            if (favouritesData && favouritesData.favorites) {
+              setIsFavourite(
+                favouritesData.favorites.some((fav) => fav.imdbID === id)
+              );
+            }
+          }
         }
       } catch (error) {
         console.error("Error fetching movie details or watchlists:", error);
@@ -73,7 +79,7 @@ const MovieDetail = ({
     };
 
     fetchMovieDetail();
-  }, [id]);
+  }, [id, isLoggedIn]);
 
   const handleFavouriteChange = async () => {
     try {
@@ -111,16 +117,72 @@ const MovieDetail = ({
     }
   };
 
+  const handleCreateWatchlist = async (e) => {
+    e.preventDefault();
+    const trimmedName = newWatchlistName.trim();
+  
+    const isDuplicate = watchlists.some(
+      (watchlist) => watchlist.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+  
+    if (isDuplicate) {
+      setModalError("A watchlist with this name already exists.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${apiUrl}/watchlist`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: trimmedName }),
+      });
+  
+      if (response.ok) {
+        const newWatchlist = await response.json();
+        setWatchlists([...watchlists, newWatchlist]);
+        setNewWatchlistName("");
+        setShowNewWatchlistModal(false);
+      } else {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to create watchlist");
+      }
+    } catch (err) {
+      setModalError(err.message);
+    }
+  };
+  
+  const handleDone = async () => {
+    try {
+      for (const watchlistId of selectedWatchlists) {
+        await onAddToWatchlist(watchlistId, movie.imdbID);
+      }
+      setShowWatchlistModal(false);
+      setSelectedWatchlists(new Set());
+    } catch (error) {
+      console.error("Error adding to watchlists:", error);
+      setError("Failed to add movie to watchlists");
+    }
+  };
+  
+  const toggleWatchlist = (watchlistId) => {
+    const newSelected = new Set(selectedWatchlists);
+    if (newSelected.has(watchlistId)) {
+      newSelected.delete(watchlistId);
+    } else {
+      newSelected.add(watchlistId);
+    }
+    setSelectedWatchlists(newSelected);
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
         <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-orange-300 border-t-gray-300"></div>
-        <p className="mt-4 text-lg text-slate-900 dark:text-white">
-          Loading...
-        </p>
-        <p className="mt-1 text-slate-600 dark:text-slate-400">
-          Rolling out the details, just for you
-        </p>
+        <p className="mt-4 text-lg text-slate-900 dark:text-white">Loading...</p>
+        <p className="mt-1 text-slate-600 dark:text-slate-400">Rolling out the details, just for you</p>
       </div>
     );
   }
@@ -136,9 +198,7 @@ const MovieDetail = ({
   if (!movie) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
-        <p className="text-xl text-slate-900 dark:text-white">
-          Movie not found
-        </p>
+        <p className="text-xl text-slate-900 dark:text-white">Movie not found</p>
       </div>
     );
   }
@@ -164,31 +224,31 @@ const MovieDetail = ({
           <table className="table-auto w-full text-left text-lg mb-4">
             <tbody>
               <tr>
-                <td className="font-semibold pr-4">Director:</td>
+                <td className="font-semibold pr-4 align-top">Director:</td>
                 <td>{movie.Director}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Cast:</td>
+                <td className="font-semibold pr-4 align-top">Cast:</td>
                 <td>{movie.Actors}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Genre:</td>
+                <td className="font-semibold pr-4 align-top">Genre:</td>
                 <td>{movie.Genre}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Year:</td>
+                <td className="font-semibold pr-4 align-top">Year:</td>
                 <td>{movie.Year}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Rated:</td>
+                <td className="font-semibold pr-4 align-top">Rated:</td>
                 <td>{movie.Rated}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Runtime:</td>
+                <td className="font-semibold pr-4 align-top">Runtime:</td>
                 <td>{movie.Runtime}</td>
               </tr>
               <tr>
-                <td className="font-semibold pr-4">Rating:</td>
+                <td className="font-semibold pr-4 align-top">Rating:</td>
                 <td>{movie.imdbRating}/10</td>
               </tr>
             </tbody>
@@ -196,93 +256,224 @@ const MovieDetail = ({
 
           <p className="mb-4 text-lg">{movie.Plot}</p>
 
-          {/* Add to Favourites Button */}
-          <div className="pt-4 w-full max-w-52">
-            <input
-              type="checkbox"
-              id="favorite"
-              name="favorite-checkbox"
-              className="hidden peer"
-              checked={isFavourite}
-              onChange={handleFavouriteChange}
-            />
-            <label
-              htmlFor="favorite"
-              className="bg-white flex items-center gap-2 p-3 cursor-pointer select-none rounded-lg shadow-lg text-black w-full"
+          {/* Action Buttons or Sign In Message */}
+          <div className="pt-4">
+            {isLoggedIn ? (
+              <div className="flex gap-4">
+                {/* Favorites Button */}
+                <div className="w-full max-w-52">
+                  <input
+                    type="checkbox"
+                    id="favorite"
+                    name="favorite-checkbox"
+                    className="hidden peer"
+                    checked={isFavourite}
+                    onChange={handleFavouriteChange}
+                  />
+                  <label
+                    htmlFor="favorite"
+                    className="bg-white flex items-center gap-2 p-3 cursor-pointer select-none rounded-lg shadow-lg text-black w-full"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 -2 22 28"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`flex-shrink-0 transition-all duration-100 ${isFavourite ? "fill-red-500 stroke-red-500" : ""}`}
+                    >
+                      <path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578,.409,.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z"/>
+                    </svg>
+                    <div className="relative overflow-hidden flex-grow">
+                      <div className="transition-all duration-500 transform flex flex-col h-6">
+                        <span
+                          className={`transition-all duration-500 transform ${isFavourite ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"} whitespace-nowrap`}
+                        >
+                          Add to Favourites
+                        </span>
+                        <span
+                          className={`transition-all duration-500 transform ${isFavourite ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"} whitespace-nowrap absolute top-0 left-0`}
+                        >
+                          Added to Favourites
+                        </span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Watchlist Button */}
+                <button
+                  onClick={() => setShowWatchlistModal(true)}
+                  className="bg-white text-black flex items-center gap-2 p-3 pl-4 rounded-lg shadow-lg w-52 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 -3 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.6"
+                  >
+                    <path fill="#000000" d="M15.5 20c-0.143 0-0.283-0.062-0.38-0.175l-5.62-6.557-5.62 6.557c-0.136 0.159-0.357 0.216-0.553 0.144s-0.327-0.26-0.327-0.469v-18c0-0.276 0.224-0.5 0.5-0.5h12c0.276 0 0.5 0.224 0.5 0.5v18c0 0.209-0.13 0.396-0.327 0.469-0.057 0.021-0.115 0.031-0.173 0.031zM9.5 12c0.146 0 0.285 0.064 0.38 0.175l5.12 5.974v-16.148h-11v16.148l5.12-5.974c0.095-0.111 0.234-0.175 0.38-0.175z"></path>
+                  </svg>
+                  Add to Watchlist
+                </button>
+              </div>
+            ) : (
+              <p className="text-lg">
+                Please <Link to="/signin" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">sign in</Link> to add the movie to favourites and watchlists.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Watchlist Selection Modal */}
+      {showWatchlistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
+              Add to Watchlist
+            </h3>
+            <div className="max-h-64 overflow-y-auto">
+              {watchlists.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  No watchlists yet
+                </p>
+              ) : (
+                watchlists.map((watchlist) => (
+                  <div
+                    key={watchlist._id}
+                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                    onClick={() => toggleWatchlist(watchlist._id)}
+                  >
+                    <div
+                      className={`w-6 h-6 border-2 rounded mr-3 flex items-center justify-center transition-colors ${
+                        selectedWatchlists.has(watchlist._id)
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {selectedWatchlists.has(watchlist._id) && (
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-slate-900 dark:text-white">
+                      {watchlist.name}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* New Watchlist Button */}
+            <button
+              onClick={() => {
+                setShowNewWatchlistModal(true);
+              }}
+              className="w-full mt-4 p-2 flex items-center gap-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 -2 22 28"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={`flex-shrink-0 transition-all duration-100 ${
-                  isFavourite ? "fill-red-500 stroke-red-500" : ""
-                }`}
               >
-                <path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z"/>
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              <div className="relative overflow-hidden flex-grow">
-                <div className="transition-all duration-500 transform flex flex-col h-6">
-                  <span
-                    className={`transition-all duration-500 transform ${
-                      isFavourite
-                        ? "-translate-y-full opacity-0"
-                        : "translate-y-0 opacity-100"
-                    } whitespace-nowrap`}
-                  >
-                    Add to Favourites
-                  </span>
-                  <span
-                    className={`transition-all duration-500 transform ${
-                      isFavourite
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-full opacity-0"
-                    } whitespace-nowrap absolute top-0 left-0`}
-                  >
-                    Added to Favourites
-                  </span>
-                  <span
-                    className={`transition-all duration-500 transform ${
-                      isFavourite
-                        ? "-translate-y-6 opacity-0"
-                        : "translate-y-full opacity-0"
-                    } whitespace-nowrap absolute top-0 left-0`}
-                  >
-                    Added to Favourites
-                  </span>
-                </div>
-              </div>
-            </label>
-          </div>
-
-          {/* Add to Watchlist Dropdown */}
-          <div className="pt-4 max-w-56">
-            <select
-              value={selectedWatchlist}
-              onChange={(e) => setSelectedWatchlist(e.target.value)}
-              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              <option value="">Select a watchlist</option>
-              {watchlists.map((watchlist) => (
-                <option key={watchlist._id} value={watchlist._id}>
-                  {watchlist.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleAddToWatchlist}
-              className="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full"
-            >
-              Add to Selected Watchlist
+              New Watchlist
             </button>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => {
+                  setShowWatchlistModal(false);
+                  setSelectedWatchlists(new Set());
+                }}
+                className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDone}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* New Watchlist Modal */}
+      {showNewWatchlistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
+              New Watchlist
+            </h3>
+            <form onSubmit={handleCreateWatchlist}>
+              <input
+                type="text"
+                value={newWatchlistName}
+                onChange={(e) => setNewWatchlistName(e.target.value)}
+                placeholder="Enter watchlist name"
+                className={`w-full px-4 py-2 border rounded-md dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  modalError ? 'border-red-500' : ''
+                }`}
+                autoFocus
+              />
+              {modalError && (
+                <p className="text-red-500 text-sm mt-1">{modalError}</p>
+              )}
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewWatchlistModal(false);
+                    setNewWatchlistName("");
+                    setModalError("");
+                  }}
+                  className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newWatchlistName.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
