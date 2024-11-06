@@ -194,27 +194,52 @@ describe("App Component", () => {
     expect(mockUserContext.logout).toHaveBeenCalled();
   });
 
-  it("handles mobile menu opening and closing", async () => {
+  it("handles mobile menu state", async () => {
     // Set mobile viewport
     global.innerWidth = 375;
     global.dispatchEvent(new Event('resize'));
-
+  
     const { container } = await renderApp();
-    const menuButton = screen.getByLabelText('Toggle menu');
-
+    
+    // Find menu button using exact class and aria-label
+    const menuButton = container.querySelector('button[aria-label="Toggle menu"]');
+    expect(menuButton).toBeInTheDocument();
+  
+    // Initial state
+    let mobileMenu = container.querySelector('.mobile-menu');
+    expect(mobileMenu.className).toContain('closed');
+    expect(mobileMenu.className).not.toContain('open');
+  
     // Open menu
     await act(async () => {
       fireEvent.click(menuButton);
     });
-
-    const mobileMenu = container.querySelector('.mobile-menu');
-    expect(mobileMenu).toHaveClass('open');
-
-    // Click outside to close
+  
+    // Check open state
+    expect(mobileMenu.className).toContain('open');
+    expect(mobileMenu.className).not.toContain('closed');
+  
+    // Click outside by creating a proper click event with closest method
     await act(async () => {
-      fireEvent.mouseDown(document.body);
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true
+      });
+      
+      // Add closest method to the event target
+      Object.defineProperty(clickEvent, 'target', {
+        value: {
+          closest: (selector) => null // simulates clicking outside both menu and button
+        }
+      });
+      
+      document.dispatchEvent(clickEvent);
     });
-
-    expect(mobileMenu).toHaveClass('closed');
+  
+    // Check closed state
+    await waitFor(() => {
+      expect(mobileMenu.className).toContain('closed');
+      expect(mobileMenu.className).not.toContain('open');
+    });
   });
 });
