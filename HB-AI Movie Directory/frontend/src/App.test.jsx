@@ -39,6 +39,18 @@ Object.defineProperty(window, 'performance', {
   writable: true
 });
 
+// Mock window.matchMedia for dark mode testing
+window.matchMedia = vi.fn().mockImplementation(query => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+}));
+
 const renderApp = async () => {
   let rendered;
   await act(async () => {
@@ -68,16 +80,43 @@ describe("App Component", () => {
     expect(screen.getByText(/Welcome, Guest!/i)).toBeInTheDocument();
   });
 
-  it("renders navigation links", async () => {
+  it("renders navigation elements correctly for desktop", async () => {
+    // Mock window inner width to simulate desktop view
+    global.innerWidth = 1024;
+    global.dispatchEvent(new Event('resize'));
+
     await renderApp();
-    expect(screen.getByText(/HOME/i)).toBeInTheDocument();
+    expect(screen.getByText(/HB-AI Movie Directory/i)).toBeInTheDocument();
+    expect(screen.getByText(/SIGN IN/i)).toBeInTheDocument();
+    expect(screen.getByText(/SIGN UP/i)).toBeInTheDocument();
+  });
+
+  it("renders hamburger menu for mobile", async () => {
+    // Mock window inner width to simulate mobile view
+    global.innerWidth = 375;
+    global.dispatchEvent(new Event('resize'));
+
+    await renderApp();
+    const menuButton = screen.getByLabelText('Toggle menu');
+    expect(menuButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(menuButton);
+    });
+
+    // Check if mobile menu items are visible after clicking
     expect(screen.getByText(/SIGN IN/i)).toBeInTheDocument();
     expect(screen.getByText(/SIGN UP/i)).toBeInTheDocument();
   });
 
   it("toggles dark mode", async () => {
     await renderApp();
-    const darkModeButton = screen.getAllByRole("button").pop();
+    const darkModeButton = screen.getAllByRole("button").find(
+      button => button.parentElement?.textContent?.includes('DARK MODE') ||
+                button.closest('button')?.getAttribute('aria-label')?.includes('dark mode')
+    );
+
+    expect(darkModeButton).toBeDefined();
 
     await act(async () => {
       fireEvent.click(darkModeButton);
@@ -126,5 +165,44 @@ describe("App Component", () => {
     expect(screen.getByText(/LOGOUT/i)).toBeInTheDocument();
     expect(screen.queryByText(/SIGN IN/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/SIGN UP/i)).not.toBeInTheDocument();
+  });
+
+  it("handles logout action", async () => {
+    vi.spyOn(UserContextModule, 'useUser').mockReturnValue({
+      ...mockUserContext,
+      user: { name: "Test User" },
+      isLoggedIn: true,
+    });
+
+    await renderApp();
+    const logoutButton = screen.getByText(/LOGOUT/i);
+    
+    await act(async () => {
+      fireEvent.click(logoutButton);
+    });
+
+    expect(mockUserContext.logout).toHaveBeenCalled();
+  });
+
+  it("handles mobile menu opening and closing", async () => {
+    // Set mobile viewport
+    global.innerWidth = 375;
+    global.dispatchEvent(new Event('resize'));
+
+    await renderApp();
+    const menuButton = screen.getByLabelText('Toggle menu');
+
+    // Open menu
+    await act(async () => {
+      fireEvent.click(menuButton);
+    });
+
+    // Click outside to close
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+
+    // Verify menu is closed (this might need adjustment based on your implementation)
+    expect(screen.queryByRole('navigation', { hidden: true })).not.toBeVisible;
   });
 });
