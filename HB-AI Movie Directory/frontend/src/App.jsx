@@ -16,6 +16,7 @@ import WatchlistDetail from "./components/WatchlistDetail";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
+import NavigationBar from "./components/NavigationBar";
 import { useUser } from "./context/UserContext";
 import logo from "./imgs/film-roll.png";
 import userLogo from "./imgs/user.png";
@@ -241,101 +242,15 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       {/* Navigation bar */}
-      <nav className="flex justify-between items-center h-[4.28rem] px-4 border-b border-gray-200 dark:border-gray-800">
-        {/* Logo */}
-        <div className="flex items-center">
-          {/* Changed from Link to anchor tag and added onClick handler */}
-          <a
-            href="/"
-            className="flex items-center cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = "/";
-            }}
-          >
-            <img src={logo} alt="Logo" className="w-7 h-7" />
-            <p className="text-center text-lg px-2">HB-AI Movie Directory</p>
-          </a>
-        </div>
-
-        {/* Navigation buttons */}
-        <div className="flex items-center">
-          {/* Changed from Link to anchor tag for HOME button */}
-          <a
-            href="/"
-            className="nav-button mr-4"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = "/";
-            }}
-          >
-            HOME
-          </a>
-
-          {!isLoggedIn ? (
-            <>
-              <Link to="/signin" className="nav-button mr-4">
-                SIGN IN
-              </Link>
-              <Link to="/signup" className="nav-button mr-4">
-                SIGN UP
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link to="/favourites" className="nav-button mr-4">
-                FAVOURITES
-              </Link>
-              <Link to="/watchlist" className="nav-button mr-4">
-                WATCHLIST
-              </Link>
-              <button onClick={handleLogout} className="nav-button mr-4">
-                LOGOUT
-              </button>
-              {/* Profile picture link */}
-              <Link to="/profile" className="mr-4">
-                <img
-                  src={user?.profilePicture || userLogo}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover border border-gray-300 hover:border-orange-400 transition-colors duration-300"
-                />
-              </Link>
-            </>
-          )}
-
-          {/* light/dark mode toggle */}
-          <button onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? (
-              // sun icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="#ffffff"
-                className="w-6 h-6 hover:fill-orange-300"
-              >
-                <path d="M12,17c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5Zm0-8c-1.65,0-3,1.35-3,3s1.35,3,3,3,3-1.35,3-3-1.35-3-3-3Zm1-5V1c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1Zm0,19v-3c0-.55-.45-1-1-1s-1,.45-1,1v3c0,.55,.45,1,1,1s1-.45,1-1ZM5,12c0-.55-.45-1-1-1H1c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm19,0c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1ZM6.71,6.71c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm14,14c.39-.39,.39-1.02,0-1.41l-2-2c-.39-.39-1.02-.39-1.41,0s-.39,1.02,0,1.41l2,2c.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Zm-16,0l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29ZM18.71,6.71l2-2c.39-.39,.39-1.02,0-1.41s-1.02-.39-1.41,0l-2,2c-.39,.39-.39,1.02,0,1.41,.2,.2,.45,.29,.71,.29s.51-.1,.71-.29Z" />
-              </svg>
-            ) : (
-              // moon stars icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="#1E293B"
-                className="w-6 h-6 hover:fill-blue-700"
-              >
-                <g>
-                  <path d="M13.273,5.865l.831,.303c.328,.12,.586,.373,.707,.693l.307,.82c.146,.391,.519,.65,.936,.65h0c.417,0,.79-.258,.937-.649l.307-.818c.122-.322,.38-.576,.708-.695l.831-.303c.395-.144,.657-.52,.657-.939s-.263-.795-.657-.939l-.831-.303c-.328-.12-.586-.373-.707-.694l-.308-.82c-.146-.391-.52-.649-.937-.649h0c-.417,0-.79,.259-.936,.65l-.306,.817c-.122,.322-.38,.576-.708,.695l-.831,.303c-.395,.144-.657,.52-.657,.939s.263,.795,.657,.939Z" />
-                  <path d="M22.386,12.003c-.402-.168-.87-.056-1.151,.279-.928,1.106-2.507,1.621-4.968,1.621-3.814,0-6.179-1.03-6.179-6.158,0-2.397,.532-4.019,1.626-4.957,.33-.284,.439-.749,.269-1.15-.17-.4-.571-.646-1.015-.604C5.285,1.572,1,6.277,1,11.977c0,6.062,4.944,10.994,11.022,10.994,5.72,0,10.438-4.278,10.973-9.951,.042-.436-.205-.848-.609-1.017Zm-10.363,8.967c-4.975,0-9.022-4.035-9.022-8.994,0-3.827,2.362-7.105,5.78-8.402-.464,1.134-.692,2.517-.692,4.17,0,7.312,4.668,8.158,8.179,8.158,1.216,0,2.761-.094,4.177-.673-1.306,3.396-4.588,5.74-8.421,5.74Z" />
-                </g>
-                <g>
-                  <circle cx="18.49" cy="11.349" r="1" />
-                  <circle cx="13.99" cy="10.766" r="1" />
-                </g>
-              </svg>
-            )}
-          </button>
-        </div>
-      </nav>
+      <NavigationBar 
+        user={user}
+        isLoggedIn={isLoggedIn}
+        handleLogout={handleLogout}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        logo={logo}
+        userLogo={userLogo}
+      />
 
       {/* Main content */}
       <main className="p-4 transition-all duration-300">
