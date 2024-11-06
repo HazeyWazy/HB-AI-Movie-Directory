@@ -73,6 +73,16 @@ backend >
     tests >
     - Testing authentication and fetching of movies
 
+frontend >
+    src > 
+        App.jsx
+        - Main app file
+        components >
+        - All main app components
+        context >
+        - Contains user context
+        imgs >
+        - Images used in project
 
 
 # Next Steps for the Project
