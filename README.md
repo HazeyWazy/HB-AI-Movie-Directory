@@ -13,7 +13,6 @@ The HB-AI Movie Directory is designed for movie enthusiasts who want an easy and
 
 At the start of this project we set out with 5 main milestones that defined success in this project. These were outlined in the project proposal and are what constituted the end of our MVP. These 5 milestones were;
 
-|------------------------------------------------------------|--------------|
 | Milestone                                                  |  Completed?  |
 |------------------------------------------------------------|--------------|
 | Movie API Integration                                      |      Yes     |
@@ -21,11 +20,9 @@ At the start of this project we set out with 5 main milestones that defined succ
 | User Accounts with proper authentication and encryption    |      Yes     |
 | Front-end to handle GPT requests and display movies        |      Yes     |
 | Individual movie pages & descriptions including ratings    |      Yes     |
-|------------------------------------------------------------|--------------|
 
 We also defined several stretch goals that we would also try and accomplish. These were sorted in our project board by “should have”, “could have” and “would like to have”. These stretch goals included;
 
-|------------------------------------------------------------|--------------|
 | Milestone                                                  |  Completed?  |
 |------------------------------------------------------------|--------------|
 | Favourites Page                                            |      Yes     |
@@ -39,7 +36,6 @@ We also defined several stretch goals that we would also try and accomplish. The
 | Movie Trailers                                             |      Yes     |
 | Differentiating Admin Accounts and Users                   |      No      |
 | Admins Banning Problematic Accounts                        |      No      |
-|------------------------------------------------------------|--------------|
 
 
 As you can see, we successfully accomplished many of our key goals, particularly those outlined in the MVP. While we didn't expect to achieve all of the stretch goals, they were more of a broad set of "nice-to-haves" rather than firm targets. For more information about our achievements and milestones have a look at both our Gantt Chart, and our Burndown Chart here.
