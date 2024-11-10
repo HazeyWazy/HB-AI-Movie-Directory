@@ -240,7 +240,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
+    <div className="flex flex-col min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-white transition-all duration-300">
       {/* Navigation bar */}
       <NavigationBar 
         user={user}
@@ -253,7 +253,7 @@ function App() {
       />
 
       {/* Main content */}
-      <main className="p-4 transition-all duration-300">
+      <main className="flex-grow p-4 flex flex-col relative transition-all duration-300">
         {location.pathname === "/" && (
           <h1 className="text-center text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-medium mt-72 mb-5">
             Welcome, {user ? user.name : "Guest"}!
@@ -290,6 +290,10 @@ function App() {
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
+      <footer className="mt-auto p-4">
+        <p className="text-sm text-center text-slate-600 dark:text-slate-400">&copy; 2024 HB-AI Movie Directory</p>
+        <p className="text-sm text-center text-slate-600 dark:text-slate-400">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </footer>
     </div>
   );
 }
