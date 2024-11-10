@@ -5,6 +5,7 @@ import movies from '../imgs/movies.jpeg';
 import {apiUrl} from "../config";
 
 const SignUp = ({ darkMode }) => {
+  // Form state management
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,11 +13,13 @@ const SignUp = ({ darkMode }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
 
+  // Image animation timing
   useEffect(() => {
     const timer = setTimeout(() => setImageLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  // Handle registration submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

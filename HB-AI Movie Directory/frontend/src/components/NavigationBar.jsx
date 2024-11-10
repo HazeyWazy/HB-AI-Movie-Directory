@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, logo, userLogo }) => {
+  // State for mobile menu
   const [isOpen, setIsOpen] = useState(false);
 
+  // Close mobile menu on screen resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -15,6 +17,7 @@ const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (isOpen && !e.target.closest('.mobile-menu') && !e.target.closest('.menu-button')) {
@@ -25,6 +28,7 @@ const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, 
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isOpen]);
 
+  // Logo component with home navigation
   const LogoComponent = () => (
     <a
       href="/"
@@ -174,6 +178,7 @@ const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, 
   );
 };
 
+// propTypes validation
 NavigationBar.propTypes = {
   user: PropTypes.object,
   isLoggedIn: PropTypes.bool.isRequired,

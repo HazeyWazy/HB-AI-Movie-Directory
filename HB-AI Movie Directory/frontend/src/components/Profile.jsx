@@ -1,9 +1,11 @@
+// Profile management component handling user details and profile picture uploads
 import React, { useState, useEffect } from "react";
 import { apiUrl } from "../config";
 import { useUser } from '../context/UserContext';
 import userLogo from "../imgs/user.png";
 
 const Profile = () => {
+  // State management for form data and UI
   const { user, updateUser } = useUser();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -14,6 +16,7 @@ const Profile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUrl, setCreatedUrl] = useState(null);
 
+  // State management for form data and UI
   useEffect(() => {
     if (user) {
       setName(user.name || "");
@@ -22,6 +25,7 @@ const Profile = () => {
     }
   }, [user]);
 
+  // Handle form submission with updates
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -164,6 +168,7 @@ const Profile = () => {
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+      {/* Alert Message */}
       {alert.show && (
         <div className={`p-4 rounded-md mb-4 ${alert.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {alert.message}

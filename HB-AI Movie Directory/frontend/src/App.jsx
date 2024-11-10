@@ -1,3 +1,4 @@
+// Main application component managing routing and global state
 import React, { useState, useEffect } from "react";
 import {
   Routes,
@@ -25,6 +26,7 @@ import "./index.css";
 import { apiUrl } from "./config";
 
 function App() {
+  // State management for theme and app data
   const [darkMode, setDarkMode] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const { user, isLoggedIn, logout } = useUser();
@@ -71,7 +73,7 @@ function App() {
     }
   });
 
-  // Add this effect to handle page refresh
+  // Handle page refresh
   useEffect(() => {
     const handleBeforeUnload = () => {
       try {
@@ -254,11 +256,14 @@ function App() {
 
       {/* Main content */}
       <main className="flex-grow p-4 flex flex-col relative transition-all duration-300">
+        {/* Welcome Message */}
         {location.pathname === "/" && (
           <h1 className="text-center text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-medium mt-72 mb-5">
             Welcome, {user ? user.name : "Guest"}!
           </h1>
         )}
+
+        {/* Route Configuration */}
         <Routes>
           <Route
             path="/"
@@ -290,6 +295,8 @@ function App() {
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
+
+      {/* Footer */}
       <footer className="mt-auto p-4">
         <p className="text-sm text-center text-slate-600 dark:text-slate-400">&copy; 2024 HB-AI Movie Directory</p>
         <p className="text-sm text-center text-slate-600 dark:text-slate-400">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>

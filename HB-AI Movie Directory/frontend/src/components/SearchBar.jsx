@@ -1,3 +1,4 @@
+// Search component with loading state and URL parameter synchronization
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -19,6 +20,7 @@ const LoadingOverlay = () => (
 );
 
 const SearchBar = ({ onSearch, isLoading = false }) => {
+  // URL parameters for search term persistence
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -37,6 +39,7 @@ const SearchBar = ({ onSearch, isLoading = false }) => {
     }
   }, [searchParams, location.pathname, onSearch, hasInitialized]);
 
+  // Handle search submission
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmedTerm = searchTerm.trim();

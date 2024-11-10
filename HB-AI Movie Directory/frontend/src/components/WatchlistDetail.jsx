@@ -3,11 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { apiUrl } from "../config";
 
 function WatchlistDetail() {
+  // State management
   const [watchlist, setWatchlist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
 
+  // Fetch watchlist details and id change
   useEffect(() => {
     const fetchWatchlist = async () => {
       try {
@@ -37,6 +39,7 @@ function WatchlistDetail() {
     fetchWatchlist();
   }, [id]);
 
+  // Handle movie removal
   const handleRemoveMovie = async (movieId) => {
     try {
       const response = await fetch(`${apiUrl}/watchlist/remove`, {
@@ -63,6 +66,7 @@ function WatchlistDetail() {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="flex flex-col min-h-[85vh] text-center justify-center">
@@ -73,18 +77,22 @@ function WatchlistDetail() {
     );
   }
 
+  // Error state
   if (error) {
     return <div>Error: {error}</div>;
   }
 
   return (
     <div className="flex-col flex-wrap justify-center gap-10 px-4 py-6">
+      {/* Watchlist title */}
       <h2 className="text-center text-4xl font-medium mb-6">{watchlist.name}</h2>
       
+      {/* Empty state or movie grid */}
       {watchlist.movies.length === 0 ? (
         <p className="mt-10 text-xl text-center">This watchlist is empty.</p>
       ) : (
         <div className="flex flex-wrap justify-center gap-10 mt-10">
+          {/* Movie cards */}
           {watchlist.movies.map((movie) => (
             <div
               key={movie.imdbID}

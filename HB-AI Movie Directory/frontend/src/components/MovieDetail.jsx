@@ -10,6 +10,7 @@ const MovieDetail = ({
   onRemoveFromFavourites,
   onAddToWatchlist,
 }) => {
+  // State management
   const [movie, setMovie] = useState(null);
   const [isFavourite, setIsFavourite] = useState(false);
   const [watchlists, setWatchlists] = useState([]);
@@ -270,6 +271,7 @@ const MovieDetail = ({
 
   return (
     <div className="bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white py-12 px-4">
+      {/* Movie details layout */}
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
         <div className="md:w-2/5">
           <img
