@@ -1,4 +1,3 @@
-
 # Project Outline
 
 With the overwhelming number of movies and streaming platforms available today, users often find it difficult to find content that matches their specific interests. Current recommendation systems on platforms like Netflix are limited to their own content libraries, which limits user discovery. Additionally, gathering movie information from various sources such as IMDb or Rotten Tomatoes can be time-consuming.
@@ -13,73 +12,74 @@ The HB-AI Movie Directory is designed for movie enthusiasts who want an easy and
 
 At the start of this project we set out with 5 main milestones that defined success in this project. These were outlined in the project proposal and are what constituted the end of our MVP. These 5 milestones were;
 
-| Milestone                                                  |  Completed?  |
-|------------------------------------------------------------|--------------|
-| Movie API Integration                                      |      Yes     |
-| ChatGPT Integration                                        |      Yes     |
-| User Accounts with proper authentication and encryption    |      Yes     |
-| Front-end to handle GPT requests and display movies        |      Yes     |
-| Individual movie pages & descriptions including ratings    |      Yes     |
+| Milestone                                               | Completed? |
+| ------------------------------------------------------- | ---------- |
+| Movie API Integration                                   | Yes        |
+| ChatGPT Integration                                     | Yes        |
+| User Accounts with proper authentication and encryption | Yes        |
+| Front-end to handle GPT requests and display movies     | Yes        |
+| Individual movie pages & descriptions including ratings | Yes        |
 
 We also defined several stretch goals that we would also try and accomplish. These were sorted in our project board by “should have”, “could have” and “would like to have”. These stretch goals included;
 
-| Milestone                                                  |  Completed?  |
-|------------------------------------------------------------|--------------|
-| Favourites Page                                            |      Yes     |
-| Watchlists                                                 |      Yes     |
-| Fluent Navigation                                          |      Yes     |
-| Trending Movies Tab                                        |      No      |
-| Update User Info                                           |      Yes     |
-| User Reviews                                               |      No      |
-| Cast Profile Page                                          |      No      |
-| Profile Pictures for Users                                 |      Yes     |
-| Movie Trailers                                             |      Yes     |
-| Differentiating Admin Accounts and Users                   |      No      |
-| Admins Banning Problematic Accounts                        |      No      |
-
+| Milestone                                | Completed? |
+| ---------------------------------------- | ---------- |
+| Favourites Page                          | Yes        |
+| Watchlists                               | Yes        |
+| Fluent Navigation                        | Yes        |
+| Trending Movies Tab                      | No         |
+| Update User Info                         | Yes        |
+| User Reviews                             | No         |
+| Cast Profile Page                        | No         |
+| Profile Pictures for Users               | Yes        |
+| Movie Trailers                           | Yes        |
+| Differentiating Admin Accounts and Users | No         |
+| Admins Banning Problematic Accounts      | No         |
 
 As you can see, we successfully accomplished many of our key goals, particularly those outlined in the MVP. While we didn't expect to achieve all of the stretch goals, they were more of a broad set of "nice-to-haves" rather than firm targets. For more information about our achievements and milestones have a look at both our Gantt Chart, and our Burndown Chart here.
 
 # Gantt Chart
+
 https://docs.google.com/spreadsheets/d/1vJx0YK2yUZrf-g0ogDmnljTYU-Vnt6CeJsr_G7OjEp0/edit?usp=sharing
 
 # Burndown Chart
-https://docs.google.com/spreadsheets/d/1saig79bapC6bHZL1T5wm8FyNCuLitagBwc7JN8htuao/edit?usp=sharing
 
+https://docs.google.com/spreadsheets/d/1saig79bapC6bHZL1T5wm8FyNCuLitagBwc7JN8htuao/edit?usp=sharing
 
 # Project Walkthrough
 
 The file structure for our project has been cleaned as much as possible to make it as easy as we can for newcomers to navigate.
 Here is where to find the important stuff!
 
-backend >
-    server.js
-    - Backend server connecting to MongoDB and all available routes
-    controllers >
-    - Controllers for authentication, favourites, movies, profiles, and watchlists
-    - Includes fetching from the GPT API in movieController.js
-    middleware >
-    - JWT authentication
-    models >
-    - Schemas for users, watchlists, and favourites
-    routes >
-    - Details all the routes used across the website
-    services >
-    - Includes fetching from the TMDB API in movieService.js
-    tests >
-    - Testing authentication and fetching of movies
+### backend/
 
-frontend >
-    src > 
-        App.jsx
-        - Main app file
-        components >
-        - All main app components
-        context >
-        - Contains user context
-        imgs >
-        - Images used in project
+- `server.js`
+  - Backend server connecting to MongoDB and all available routes
+- `controllers/`
+  - Controllers for authentication, favourites, movies, profiles, and watchlists
+  - Includes fetching from the GPT API in `movieController.js`
+- `middleware/`
+  - JWT authentication
+- `models/`
+  - Schemas for users, watchlists, and favourites
+- `routes/`
+  - Details all the routes used across the website
+- `services/`
+  - Includes fetching from the TMDB API in `movieService.js`
+- `tests/`
+  - Testing authentication and fetching of movies
 
+### frontend/
+
+- `src/`
+  - `App.jsx`
+    - Main app file
+  - `components/`
+    - All main app components
+  - `context/`
+    - Contains user context
+  - `imgs/`
+    - Images used in project
 
 # Next Steps for the Project
 
@@ -103,8 +103,21 @@ https://docs.google.com/document/d/1t3Xw_ztyrG6TcWzXHeGf9huGQaYNu3ytEPjuqeYHCeg/
 
 # Valid Login
 
-email: tester@testing.com.au
+email: tester@testing.com.au  
 password: test
 
 You can also sign up and create your own if you like.
 
+# References
+
+| Resource Type       | Source                                                                                                                                                                                                                                                                                                                                                                                                                                           | Description                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| **APIs & Services** |                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                   |
+| TMDB                | [API Documentation](https://developer.themoviedb.org/v4/reference/intro/getting-started)                                                                                                                                                                                                                                                                                                                                                         | Movie database API for fetching movie information |
+| Cloudinary          | [Documentation](https://cloudinary.com/documentation/image_upload_api_reference)                                                                                                                                                                                                                                                                                                                                                                 | Image upload and management service               |
+| OpenAI              | [API Reference](https://platform.openai.com/docs/api-reference/introduction)                                                                                                                                                                                                                                                                                                                                                                     | AI integration for movie recommendations          |
+| **Icons & Images**  |                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                   |
+| Theme Toggle        | [Moon Stars Icon](https://www.flaticon.com/free-icon-font/moon-stars_17511562)<br>[Brightness Icon](https://www.flaticon.com/free-icon-font/brightness_9247322)                                                                                                                                                                                                                                                                                  | Dark/Light mode toggle icons                      |
+| Logo                | [Film Roll](https://www.flaticon.com/free-icon/film-roll_11434863)                                                                                                                                                                                                                                                                                                                                                                               | HB-AI Movie Directory logo                        |
+| Authentication      | [Movie Poster Collection](https://www.filmmakersacademy.com/the-10-types-of-movie-a-poster-analysis/)                                                                                                                                                                                                                                                                                                                                            | Image used in sign in/sign up forms               |
+| User Interface      | [User Profile](https://www.flaticon.com/free-icon/user_3177440)<br>[Watchlist Placeholder](https://www.flaticon.com/free-icon/add-to-playlist_7513150)<br>[Delete Icon](https://www.flaticon.com/free-icon-font/trash_17767845)<br>[Heart Icon](https://www.flaticon.com/free-icon-font/heart_3916769)<br>[Plus Icon](https://www.flaticon.com/free-icon-font/plus_3917163)<br>[Checkbox](https://www.flaticon.com/free-icon-font/check_3917084) | Various UI icons used throughout the application  |
