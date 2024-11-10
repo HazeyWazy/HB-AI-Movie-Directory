@@ -1,6 +1,8 @@
+// Manages user watchlists for tracking movies to watch later
 const Watchlist = require("../models/Watchlist");
 const { fetchMovieDetailsById } = require("../services/movieService");
 
+// Creates a new empty watchlist for the user
 exports.createWatchlist = async (req, res) => {
   const { name } = req.body;
   const userId = req.user.userId;
@@ -15,6 +17,7 @@ exports.createWatchlist = async (req, res) => {
   }
 };
 
+// Retrieves all watchlists for the authenticated user
 exports.getUserWatchlists = async (req, res) => {
   const userId = req.user.userId;
 
@@ -27,6 +30,7 @@ exports.getUserWatchlists = async (req, res) => {
   }
 };
 
+// Gets detailed information about a specific watchlist including movie details
 exports.getWatchlistById = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.userId;
@@ -38,6 +42,7 @@ exports.getWatchlistById = async (req, res) => {
       return res.status(404).json({ error: "Watchlist not found" });
     }
 
+    // Fetch detailed information for each movie in the watchlist
     const movieDetailsPromises = watchlist.movies.map(fetchMovieDetailsById);
     const movieDetails = await Promise.all(movieDetailsPromises);
 
@@ -48,6 +53,7 @@ exports.getWatchlistById = async (req, res) => {
   }
 };
 
+// Adds a movie to a specified watchlist if not already present
 exports.addToWatchlist = async (req, res) => {
   const { watchlistId, movieId } = req.body;
   const userId = req.user.userId;
@@ -71,6 +77,7 @@ exports.addToWatchlist = async (req, res) => {
   }
 };
 
+// Removes a movie from a specified watchlist
 exports.removeFromWatchlist = async (req, res) => {
   const { watchlistId, movieId } = req.body;
   const userId = req.user.userId;
@@ -92,6 +99,7 @@ exports.removeFromWatchlist = async (req, res) => {
   }
 };
 
+// Deletes an entire watchlist and its contents
 exports.deleteWatchlist = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.userId;

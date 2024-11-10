@@ -1,3 +1,4 @@
+// Movie Routes: Handles movie search and details
 const express = require('express');
 const {
   getMovieDetails,
@@ -7,11 +8,9 @@ const {
 
 const router = express.Router();
 
-// Main search route
-router.get('/suggestAndFetch', suggestAndFetchMoviesAI);
-
-// Movie detail routes
-router.get('/movie/:id', getMovieDetails);
-router.get('/movie/:id/recommendations', getRecommendations);
+// Public routes - no authentication required
+router.get('/suggestAndFetch', suggestAndFetchMoviesAI);      // Get AI-powered movie suggestions
+router.get('/movie/:id', getMovieDetails);                    // Get detailed movie information
+router.get('/movie/:id/recommendations', getRecommendations); // Get movie recommendations
 
 module.exports = router;

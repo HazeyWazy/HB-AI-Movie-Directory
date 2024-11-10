@@ -1,3 +1,4 @@
+// Movie Service: Handles all TMDB API interactions for movie data
 const axios = require("axios");
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -19,6 +20,7 @@ const makeApiRequest = async (endpoint, params = {}) => {
   }
 };
 
+// Search movies by title with pagination
 exports.fetchMovieByTitle = async (title, page = 1) => {
   try {
     const data = await makeApiRequest("/search/movie", {
@@ -30,6 +32,7 @@ exports.fetchMovieByTitle = async (title, page = 1) => {
       sort_by: "popularity.desc",
     });
 
+    // Transform TMDB data to match application schema
     return {
       Search: data.results
         .map((movie) => ({
@@ -56,6 +59,7 @@ exports.fetchMovieByTitle = async (title, page = 1) => {
   }
 };
 
+// Get detailed movie information including credits and recommendations
 exports.fetchMovieDetailsById = async (id) => {
   try {
     const data = await makeApiRequest(`/movie/${id}`, {
@@ -85,6 +89,7 @@ exports.fetchMovieDetailsById = async (id) => {
           : "N/A",
       })) || [];
 
+    // Return formatted movie details
     return {
       imdbID: data.id.toString(),
       Title: data.title,
@@ -110,6 +115,7 @@ exports.fetchMovieDetailsById = async (id) => {
   }
 };
 
+// Search movies by various criteria (genres, popularity, etc.)
 exports.fetchMovieByQuery = async (params = {}) => {
   try {
     const data = await makeApiRequest("/discover/movie", {
@@ -121,14 +127,13 @@ exports.fetchMovieByQuery = async (params = {}) => {
       ...params,
     });
 
+    // Transform and filter results
     return data.results
       .map((movie) => ({
         imdbID: movie.id.toString(),
         Title: movie.title,
         Year: movie.release_date?.split("-")[0] || "N/A",
-        Poster: movie.poster_path
-          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-          : "N/A",
+        Poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "N/A",
         Type: "movie",
         Overview: movie.overview,
         VoteAverage: movie.vote_average,
@@ -141,6 +146,7 @@ exports.fetchMovieByQuery = async (params = {}) => {
   }
 };
 
+// Get movie trailer with smart fallback options
 exports.fetchMovieTrailerById = async (id, movieTitle, releaseYear) => {
   console.log("service: ", id);
   try {
@@ -149,7 +155,6 @@ exports.fetchMovieTrailerById = async (id, movieTitle, releaseYear) => {
     });
 
     const trailers = data.results || [];
-
     console.log("Trailers array:", trailers);
 
     if (!Array.isArray(trailers)) {
@@ -181,8 +186,7 @@ exports.fetchMovieTrailerById = async (id, movieTitle, releaseYear) => {
       (video) => video.type === "Trailer" && video.site === "YouTube"
     );
 
-    const selectedTrailer =
-      filteredTrailer || fallbackTrailer || defaultTrailer;
+    const selectedTrailer = filteredTrailer || fallbackTrailer || defaultTrailer;
 
     if (selectedTrailer) {
       return {

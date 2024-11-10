@@ -1,6 +1,8 @@
+// Manages user's favorite movies collection with add, remove, and list operations
 const Favorites = require("../models/Favourites");
 const { fetchMovieDetailsById } = require("../services/movieService");
 
+// Adds a movie to user's favorites list after validating movie exists
 exports.addFavorite = async (req, res) => {
   const { movieId } = req.body;
   const userId = req.user.userId;
@@ -33,8 +35,9 @@ exports.addFavorite = async (req, res) => {
   }
 };
 
+// Removes a movie from user's favorites list
 exports.removeFavorite = async (req, res) => {
-  const { movieId } = req.params; // Changed from req.body to req.params
+  const { movieId } = req.params;
   const userId = req.user.userId;
 
   if (!movieId) {
@@ -62,6 +65,7 @@ exports.removeFavorite = async (req, res) => {
   }
 };
 
+// Retrieves all favorite movies with detailed information
 exports.getFavorites = async (req, res) => {
   const userId = req.user.userId;
   console.log("GET /favourites route hit");
@@ -73,6 +77,7 @@ exports.getFavorites = async (req, res) => {
       return res.status(200).json({ favorites: [] }); // Changed to 200 status and empty array
     }
 
+    // Fetch detailed information for each favorite movie
     const movieDetailsPromises = favorites.movies.map(fetchMovieDetailsById);
     const movieDetails = await Promise.all(movieDetailsPromises);
 

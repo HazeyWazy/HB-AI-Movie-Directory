@@ -1,3 +1,4 @@
+// Handles movie-related operations including search, recommendations, and AI suggestions
 const { 
   fetchMovieByTitle, 
   fetchMovieDetailsById,
@@ -11,6 +12,7 @@ const openai = new OpenAI({
 });
 
 // Helper Functions
+// Safely fetches movie information with error handling
 const safeMovieFetch = async (title) => {
   try {
     const result = await fetchMovieByTitle(title);
@@ -25,6 +27,7 @@ const safeMovieFetch = async (title) => {
   }
 };
 
+// Retrieves detailed movie information by ID
 const getDetailedMovieInfo = async (movie) => {
   if (!movie || !movie.imdbID) return null;
   try {
@@ -35,6 +38,7 @@ const getDetailedMovieInfo = async (movie) => {
   }
 };
 
+// Processes AI response into clean movie titles
 const processGPTResponse = (content) => {
   if (!content) return [];
   return content
@@ -44,6 +48,7 @@ const processGPTResponse = (content) => {
 };
 
 // Main Routes
+// Fetches detailed movie information by ID
 exports.getMovieDetails = async (req, res) => {
   const { id } = req.params;
   if (!id) {
@@ -58,6 +63,7 @@ exports.getMovieDetails = async (req, res) => {
   }
 };
 
+// Uses AI to suggest movies based on user prompt and fetches their details
 exports.suggestAndFetchMoviesAI = async (req, res) => {
   const { userPrompt } = req.query;
   if (!userPrompt || typeof userPrompt !== 'string') {
@@ -85,17 +91,15 @@ exports.suggestAndFetchMoviesAI = async (req, res) => {
       throw new Error("Invalid AI response");
     }
 
-    // Process suggestions
+    // Process suggestions and fetch details
     const movieTitles = processGPTResponse(response.choices[0].message.content);
     if (movieTitles.length === 0) {
       return res.status(404).json({ error: "No movie suggestions generated" });
     }
 
-    // Fetch movie details
     const movieFetchPromises = movieTitles.map(safeMovieFetch);
     const movieResults = await Promise.allSettled(movieFetchPromises);
 
-    // Process results
     const foundMovies = movieResults
       .filter(result => result.status === 'fulfilled' && result.value)
       .map(result => result.value.Search[0])
@@ -108,16 +112,13 @@ exports.suggestAndFetchMoviesAI = async (req, res) => {
       });
     }
 
-    // Get detailed information
     const detailedMoviePromises = foundMovies.map(getDetailedMovieInfo);
     const detailedResults = await Promise.allSettled(detailedMoviePromises);
 
-    // Process detailed results
     const finalMovies = detailedResults
       .filter(result => result.status === 'fulfilled' && result.value)
       .map(result => result.value);
 
-    // Return results with metadata
     return res.status(200).json({
       results: finalMovies,
       metadata: {
@@ -138,6 +139,7 @@ exports.suggestAndFetchMoviesAI = async (req, res) => {
   }
 };
 
+// Provides movie recommendations based on similar genres
 exports.getRecommendations = async (req, res) => {
   const { id } = req.params;
   if (!id) {
@@ -145,24 +147,23 @@ exports.getRecommendations = async (req, res) => {
   }
 
   try {
-    // Get movie details with recommendations
     const movieDetails = await fetchMovieDetailsById(id);
     
     if (!movieDetails) {
       return res.status(404).json({ error: "Movie not found" });
     }
 
-    // If no recommendations, try to find similar movies by genre
+    // Find similar movies by genre if no recommendations exist
     if (!movieDetails.Recommendations || movieDetails.Recommendations.length === 0) {
       const genres = movieDetails.Genre.split(', ');
       const similarMovies = await fetchMovieByQuery({ 
         sort_by: 'popularity.desc',
-        with_genres: genres[0] // Use first genre
+        with_genres: genres[0]
       });
       
       movieDetails.Recommendations = similarMovies
-        .filter(movie => movie.imdbID !== id) // Remove the original movie
-        .slice(0, 5) // Limit to 5 recommendations
+        .filter(movie => movie.imdbID !== id)
+        .slice(0, 5)
         .map(movie => ({
           id: movie.imdbID,
           title: movie.Title,
@@ -182,5 +183,3 @@ exports.getRecommendations = async (req, res) => {
     });
   }
 };
-
-module.exports = exports;

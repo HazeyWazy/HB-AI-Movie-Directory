@@ -1,5 +1,7 @@
+// Handles movie trailer fetching operations
 const { fetchMovieTrailerById } = require("../services/movieService");
 
+// Fetches movie trailer by IMDB ID with error handling
 exports.fetchTrailer = async (req, res) => {
   const { id } = req.params;
   console.log("constroller: ", id);

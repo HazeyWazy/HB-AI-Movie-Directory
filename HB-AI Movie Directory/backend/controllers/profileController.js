@@ -1,5 +1,7 @@
+// Handles user profile operations including profile updates and picture management
 const User = require("../models/User");
 
+// Retrieves user profile information excluding sensitive data
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
@@ -13,6 +15,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+// Updates user profile information (name and bio)
 exports.updateProfile = async (req, res) => {
   try {
     const { name, bio } = req.body;
@@ -31,6 +34,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+// Handles profile picture upload and updates user profile
 exports.uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {

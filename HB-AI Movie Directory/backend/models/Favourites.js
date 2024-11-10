@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+// Schema for user's favorite movies collection
 const favoritesSchema = new Schema(
   {
     userId: {
@@ -10,7 +11,7 @@ const favoritesSchema = new Schema(
     },
     movies: [
       {
-        type: String,
+        type: String, // Stores IMDB IDs
       },
     ],
   },

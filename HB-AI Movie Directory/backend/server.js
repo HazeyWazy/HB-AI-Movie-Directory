@@ -1,3 +1,4 @@
+// Main server configuration and initialization
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -7,7 +8,7 @@ require("dotenv").config();
 
 const app = express();
 
-// CORS configuration
+// Configure CORS for specific origins with credentials
 app.use(
   cors({
     origin: [
@@ -20,32 +21,35 @@ app.use(
   })
 );
 
-app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Middleware setup
+app.use(cookieParser());           // Parse cookies for authentication
+app.use(express.json());           // Parse JSON request bodies
+app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve static files
 
-// Routes
+// Import and configure routes
 const authRoutes = require("./routes/authRoutes");
 const movieRoutes = require("./routes/movieRoutes");
 const favouritesRoutes = require("./routes/favouritesRoutes");
 const profileRoutes = require("./routes/profileRoutes");
-const watchlistRoutes = require("./routes/watchlistRoutes"); // Add this line
+const watchlistRoutes = require("./routes/watchlistRoutes");
 const trailerRoutes = require("./routes/trailerRoutes");
 
-app.use("/api/auth", authRoutes);
-app.use("/api/movies", movieRoutes);
-app.use("/api", favouritesRoutes);
-app.use("/api", profileRoutes);
-app.use("/api", watchlistRoutes); // Add this line
-app.use("/api", trailerRoutes);
+// Route middleware setup
+app.use("/api/auth", authRoutes);      // Authentication endpoints
+app.use("/api/movies", movieRoutes);    // Movie search and details
+app.use("/api", favouritesRoutes);      // User favorites management
+app.use("/api", profileRoutes);         // User profile management
+app.use("/api", watchlistRoutes);       // Watchlist management
+app.use("/api", trailerRoutes);         // Movie trailer endpoints
 
-// MongoDB connection
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

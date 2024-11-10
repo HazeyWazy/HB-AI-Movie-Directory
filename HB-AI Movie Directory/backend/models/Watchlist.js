@@ -14,7 +14,7 @@ const watchlistSchema = new Schema(
     },
     movies: [
       {
-        type: String, 
+        type: String, // Stores IMDB IDs
       },
     ],
   },
