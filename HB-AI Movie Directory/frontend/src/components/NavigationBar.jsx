@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, logo, userLogo }) => {
   // State for mobile menu
   const [isOpen, setIsOpen] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Close mobile menu on screen resize
   useEffect(() => {
@@ -42,6 +43,21 @@ const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, 
       <p className="text-center text-lg px-2">HB-AI Movie Directory</p>
     </a>
   );
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const position = window.scrollY;
+      const menuElement = document.querySelector('.mobile-menu');
+      if (menuElement) {
+        // Always move with scroll, both up and down
+        menuElement.style.marginTop = `-${position}px`;
+      }
+      setScrollPosition(position);
+    };
+  
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [scrollPosition]);
 
   return (
     <nav className="flex items-center h-[4.28rem] px-4 border-b border-gray-200 dark:border-gray-800">
@@ -98,7 +114,7 @@ const NavigationBar = ({ user, isLoggedIn, handleLogout, darkMode, setDarkMode, 
               <Link to="/profile" className="nav-button" onClick={() => setIsOpen(false)}>
                 PROFILE
               </Link>
-              <button onClick={() => { handleLogout(); setIsOpen(false); }} className="nav-button">
+              <button onClick={() => { handleLogout(); setIsOpen(false); }} className="nav-button text-left">
                 LOGOUT
               </button>
             </>

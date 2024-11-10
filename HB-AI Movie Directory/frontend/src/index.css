@@ -35,9 +35,9 @@
   }
 
   .mobile-menu {
-    @apply fixed left-0 top-[4.28rem] w-64 h-[calc(100vh-4.28rem)] 
-           bg-white dark:bg-slate-800 shadow-lg transform 
-           transition-transform duration-300 ease-in-out z-50;
+    @apply fixed left-0 w-64 h-[1000%] bg-white dark:bg-slate-800 shadow-lg 
+           transform transition-transform duration-300 ease-in-out z-50;
+    top: 4.28rem;
   }
 
   .mobile-menu.closed {
