@@ -167,17 +167,17 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+    <div className="w-full max-w-3xl mx-auto mt-10 p-4 sm:p-6 md:p-8 bg-white dark:bg-slate-800 rounded-lg shadow-md">
       {/* Alert Message */}
       {alert.show && (
         <div className={`p-4 rounded-md mb-4 ${alert.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {alert.message}
         </div>
       )}
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Profile</h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-gray-800 dark:text-white">Profile</h2>
       
       <div className="mb-6">
-        <div className="relative mx-auto w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden">
+        <div className="relative mx-auto w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full border-2 border-gray-300 overflow-hidden">
           <img
             src={imagePreview}
             id="output"
@@ -210,7 +210,7 @@ const Profile = () => {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 md:py-3 px-3 md:px-4 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline text-base md:text-lg"
           />
         </div>
         <div className="mb-6">
@@ -224,12 +224,12 @@ const Profile = () => {
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline h-32"
+            className="shadow appearance-none border rounded w-full py-2 md:py-3 px-3 md:px-4 text-gray-700 focus:border-blue-500 dark:text-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-gray-400 leading-tight focus:outline-none focus:shadow-outline h-32 md:h-40 lg:h-48 text-base md:text-lg"
           ></textarea>
         </div>
         <button
           type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 text-base md:text-lg"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Updating..." : "Update Profile"}
