@@ -97,6 +97,10 @@ Budhil focused on the AI integration for the project. He was able to engineer us
 
 Aidan took on a project management role, organising the documentation, sprint reviews and project board. He kept track of milestones and created gantt charts and burndown charts to track progress and understand the state of the project at any given time. He was also responsible for encouraging communication and discussion between the team, allowing for us to work together collaboratively and coherently.
 
+# API Contract
+
+https://docs.google.com/document/d/1t3Xw_ztyrG6TcWzXHeGf9huGQaYNu3ytEPjuqeYHCeg/edit?usp=sharing
+
 # Valid Login
 
 email: tester@testing.com.au
