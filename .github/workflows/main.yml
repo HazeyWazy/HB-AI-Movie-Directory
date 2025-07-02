@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
+      # Install Frontend Dependencies
+      - name: Install Frontend Dependencies
+        run: |
+          cd "HB-AI Movie Directory/frontend"
+          npm ci || npm install
+
+      # Install Backend Dependencies
+      - name: Install Backend Dependencies
+        run: |
+          cd "HB-AI Movie Directory/backend"
+          npm ci || npm install
+
+      # Run Frontend Tests
+      - name: Run Frontend Tests
+        run: |
+          cd "HB-AI Movie Directory/frontend"
+          npm test
+
+      # Run Backend Tests
+      - name: Run Backend Tests
+        env:
+          OMDB_API_KEY: replace_with_omdb_api_key
+          CHAT_GPT_API : replace_with_chat_gpt_api_key
+          MONGO_URL : replace_with_mongo_url
+        run: |
+          cd "HB-AI Movie Directory/backend"
+          npm test
